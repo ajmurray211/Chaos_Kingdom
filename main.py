@@ -1,10 +1,15 @@
+from email.header import Header
 import pygame, os, random, time
 pygame.font.init()
 
 # set a window
+WIDTH , HEIGHT  = 1000, 700
+WIN = pygame.display.set_mode((WIDTH,HEIGHT))
+pygame.display.set_caption("Chaos Kingdom!")
 
 # set border 
 # set FPS and Vel for bullets and player movement
+FPS = 60
 # set W adn H for player size
 
 # Import pictures and set colors
@@ -12,6 +17,7 @@ pygame.font.init()
 # player 2
 # Bullet
 # Background
+BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battlemap_bg.png')), (WIDTH,HEIGHT))
 # color dict
 
 ## Battlemap gameplay ##
@@ -31,7 +37,20 @@ pygame.font.init()
 
 # def to draw the winner text
 
+# def to draw the window
+def draw_window():
+    """This method updates the window"""
+    WIN.blit(BG, (0,0))
+    pygame.display.update()
+
 ## This is the process for filtering multiple screens ###
+def main():
+    run =True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        draw_window()
     # def for main menu
     #     filter clicks to launch different screens
     #         closing the app
@@ -52,3 +71,4 @@ pygame.font.init()
 
             
 # call main menu to run the app 
+main()
