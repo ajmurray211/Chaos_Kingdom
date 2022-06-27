@@ -8,21 +8,30 @@ WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Chaos Kingdom!")
 
 # set border 
+# import font
+main_font = pygame.font.SysFont('comicsans', 50)
+
 # set FPS and Vel for bullets and player movement
 FPS = 60
 # set W adn H for player size
+PLAYER_W, PLAYER_H = 50, 50
+BULLET_W, BULLET_H = 10, 10
 
-# Import pictures and set colors
+## Import pictures and set colors ##
 # player 1
+BLUE_1 = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
 # player 2
+YELLOW_2 = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
 # Bullet
+BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (PLAYER_W, PLAYER_H))
 # Background 
 MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'main_menu_bg.jpeg')), (WIDTH,HEIGHT))
 GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg.jpeg')), (WIDTH,HEIGHT))
 BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battlemap_bg.png')), (WIDTH,HEIGHT))
-BG_KEYS = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
+BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
-# color dict
+# color
+color_dict = {'white':(255,255,255), 'yellow':(0,255,255), 'blue':(0,255,0), 'black':(0,0,0)}
 
 ## Battlemap gameplay ##
 
@@ -40,11 +49,22 @@ BG_KEYS = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
     # def for offscreen
 
 # def to draw the winner text
+test = 'test text'
+# def to draw main_menu
+def draw_main_menu(test):
+    main_text = main_font.render(test, 1, (255,255,255))
+    WIN.blit(main_text, (10,10))
 
 # def to draw the window
-def draw_window(background):
+def draw_window(background, curr_index):
     """This method updates the window"""
     WIN.blit(background, (0,0))
+    # filter what to run 
+    if curr_index == 1:
+        draw_main_menu(test)
+    # if curr_index == 2:
+    # if curr_index == 3:
+
     pygame.display.update()
 
 ## This is the process for filtering multiple screens ###
@@ -56,18 +76,21 @@ def main():
     run = True
     while run:
         # draw main menu background
-        draw_window(BG_KEYS[str(current_bg_index)])
+        draw_window(BG_DICT[str(current_bg_index)], current_bg_index)
         # default quit function in loop
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_9] or event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.KEYDOWN:
+            if keys[pygame.K_g] or event.type == pygame.KEYDOWN:
                 current_bg_index = 2
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_q]:
+                if keys[pygame.K_RETURN]:
                     current_bg_index = 3
-                if keys[pygame.K_ESCAPE]:
-                    current_bg_index = 2         
+                if keys[pygame.K_g]:
+                    current_bg_index = 2
+                if keys[pygame.K_y]:
+                    current_bg_index = 1 
+                
     # def for main menu
     #     filter clicks to launch different screens
     #         closing the app
