@@ -1,4 +1,3 @@
-
 import pygame, os, random, time
 pygame.font.init()
 
@@ -49,21 +48,32 @@ color_dict = {'white':(255,255,255), 'yellow':(0,255,255), 'blue':(0,255,0), 'bl
     # def for offscreen
 
 # def to draw the winner text
-test = 'test text'
+input = 'test text'
 # def to draw main_menu
-def draw_main_menu(test):
-    main_text = main_font.render(test, 1, (255,255,255))
+def draw_main_menu(input):
+    main_text = main_font.render(input, 1, (255,255,255))
     WIN.blit(main_text, (10,10))
+# def to draw main_menu
+def draw_gameboard(input):
+    main_text = main_font.render(input, 1, (255,255,255))
+    WIN.blit(main_text, (10,10))
+# def to draw main_menu
+def draw_battlemap(input):
+    main_text = main_font.render(input, 1, (255,255,255))
+    WIN.blit(main_text, (50,50))
 
 # def to draw the window
-def draw_window(background, curr_index):
+def draw_window(background, curr_index, input):
     """This method updates the window"""
     WIN.blit(background, (0,0))
-    # filter what to run 
+
+    # filter what to draw 
     if curr_index == 1:
-        draw_main_menu(test)
-    # if curr_index == 2:
-    # if curr_index == 3:
+        draw_main_menu(input)
+    if curr_index == 2:
+        draw_gameboard(input)
+    if curr_index == 3:
+        draw_battlemap(input)
 
     pygame.display.update()
 
@@ -89,7 +99,7 @@ def main():
                 if keys[pygame.K_g]:
                     current_bg_index = 2
                 if keys[pygame.K_y]:
-                    current_bg_index = 1 
+                    current_bg_index = 1
                 
     # def for main menu
     #     filter clicks to launch different screens
