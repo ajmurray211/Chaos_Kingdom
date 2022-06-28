@@ -24,6 +24,8 @@ YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets
 # Bullet
 BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (PLAYER_W, PLAYER_H))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
+BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
+SAND_BAGS = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sand_bags.png')), (90, 70))
 # Background 
 MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'main_menu_bg.jpeg')), (WIDTH,HEIGHT))
 GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg.jpeg')), (WIDTH,HEIGHT))
@@ -66,13 +68,13 @@ class Player:
         self.y =y
         self.player_img = player_img
 
+    # def to draw a player on the screen
     def draw(self, window):
-        # window.blit(self.player_img, (self.x,self.y))
         window.blit(self.player_img, (self.x,self.y))
+
     # def to shoot
     # def to move bullets
     # def for being hit 
-    # def to draw
     # def for healthbar
 
 # class for bullet
@@ -97,11 +99,15 @@ def draw_gameboard(input):
 def draw_battlemap(input):
     main_text = main_font.render(input['title'], 1, (255,255,255))
     WIN.blit(main_text, (50,50))
-    yellow_player = Player(50,50,YELLOW_PLAYER_IMG)
-    blue_player = Player(100,100,BLUE_PLAYER_IMG)
+
+    yellow_player = Player(50,HEIGHT - YELLOW_PLAYER_IMG.get_width() - 20 ,YELLOW_PLAYER_IMG)
+    blue_player = Player(WIDTH - BLUE_PLAYER_IMG.get_width() - 20,100,BLUE_PLAYER_IMG)
     yellow_player.draw(WIN)
     blue_player.draw(WIN)
+
     WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
+    WIN.blit(SAND_BAGS, (10,10))
+    
 
 # def to draw the window
 def draw_window(background, curr_index):
