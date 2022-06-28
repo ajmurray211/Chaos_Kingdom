@@ -1,6 +1,3 @@
-
-from configparser import MissingSectionHeaderError
-from syslog import LOG_USER
 import pygame, os, random, time
 pygame.font.init()
 
