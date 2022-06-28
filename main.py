@@ -18,9 +18,9 @@ BULLET_W, BULLET_H = 10, 10
 
 ## Import pictures and set colors ##
 # player 1
-BLUE_PLAYER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
+BLUE_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
 # player 2
-YELLOW_PLAYER= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
+YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
 # Bullet
 BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (PLAYER_W, PLAYER_H))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
@@ -60,6 +60,15 @@ text_dict = {
 ## Battlemap gameplay ##
 
 # player class
+class Player:
+    def __init__(self,x, y, player_img):
+        self.x =x
+        self.y =y
+        self.player_img = player_img
+
+    def draw(self, window):
+        # window.blit(self.player_img, (self.x,self.y))
+        window.blit(self.player_img, (self.x,self.y))
     # def to shoot
     # def to move bullets
     # def for being hit 
@@ -88,8 +97,10 @@ def draw_gameboard(input):
 def draw_battlemap(input):
     main_text = main_font.render(input['title'], 1, (255,255,255))
     WIN.blit(main_text, (50,50))
-    WIN.blit(YELLOW_PLAYER, (10, HEIGHT - YELLOW_PLAYER.get_height() - 10))
-    WIN.blit(BLUE_PLAYER, (WIDTH - BLUE_PLAYER.get_width() - 10, 10))
+    yellow_player = Player(50,50,YELLOW_PLAYER_IMG)
+    blue_player = Player(100,100,BLUE_PLAYER_IMG)
+    yellow_player.draw(WIN)
+    blue_player.draw(WIN)
     WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
 
 # def to draw the window
