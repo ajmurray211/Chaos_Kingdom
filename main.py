@@ -1,4 +1,3 @@
-from ctypes import Structure
 import pygame, os, random, time
 pygame.font.init()
 
@@ -35,7 +34,7 @@ BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', '
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
 # color
-color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0)}
+color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
@@ -62,19 +61,21 @@ text_dict = {
 }
 
 ## Battlemap gameplay ##
-
 # player class
 class Player:
-    def __init__(self,x, y, player_img):
+    def __init__(self,x, y, player_img, health =100):
         self.x =x
         self.y =y
         self.player_img = player_img
         self.mask = pygame.mask.from_surface(self.player_img)
         self.bullets = []
+        self.health = health
+        self.max_health = 100
 
     # def to draw a player on the screen
     def draw(self, window):
         window.blit(self.player_img, (self.x,self.y))
+        self.healthbar(window)
         for bullet in self.bullets:
             bullet.draw(window)
 
@@ -98,6 +99,9 @@ class Player:
 
     # def for being hit 
     # def for healthbar
+    def healthbar(self, window):
+        pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
+        pygame.draw.rect(window, color_dict['green'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width() * (self.health / self.max_health), 10))
 
 # class for bullet
 class Bullet:
@@ -165,7 +169,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
            WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
            for i in range(0, text_dict['3'][key]['structures']):
                WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
-        #    draws blues info
+        # draws blues info
         if key == 'blue':
             blue_ammo_count = ammo_count_font.render(str(text_dict['3'][key]['ammo']),1,color_dict['blue'])
             WIN.blit(blue_ammo_count, (WIDTH/2 + blue_ammo_count.get_width(), 10))

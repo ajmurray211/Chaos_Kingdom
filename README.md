@@ -5,7 +5,7 @@
 |---|---| ---|
 |Day 0| Project Research | Complete
 |Day 1| Wireframes / Priority Matrix / Timeline / Approval | Complete
-|Day 2| Core Application Structure for main menu, game board, and battle map | Incomplete
+|Day 2| Core Application Structure for main menu, game board, and battle map | Complete
 |Day 3| Battle map gameplay | Incomplete
 |Day 4| Game board gameplay | Incomplete
 |Day 5| Custom controls or save/load feature| Incomplete
