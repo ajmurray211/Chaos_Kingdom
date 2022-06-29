@@ -1,3 +1,4 @@
+from ctypes import Structure
 import pygame, os, random, time
 pygame.font.init()
 
@@ -9,6 +10,7 @@ pygame.display.set_caption("Chaos Kingdom!")
 # set border 
 # import font
 main_font = pygame.font.SysFont('comicsans', 30)
+ammo_count_font = pygame.font.SysFont('comicsans', 60)
 
 # set FPS and Vel for bullets and player movement
 FPS = 60
@@ -33,7 +35,7 @@ BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', '
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
 # color
-color_dict = {'white':(255,255,255), 'yellow':(0,255,255), 'blue':(0,255,0), 'black':(0,0,0)}
+color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0)}
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
@@ -68,14 +70,20 @@ class Player:
         self.y =y
         self.player_img = player_img
         self.mask = pygame.mask.from_surface(self.player_img)
+        self.bullets = []
 
     # def to draw a player on the screen
     def draw(self, window):
         window.blit(self.player_img, (self.x,self.y))
+        for bullet in self.bullets:
+            bullet.draw(window)
 
     # def to shoot
     def shoot(self):
-        pass
+        if len(self.bullets):
+            bullet = Bullet(self.x, self.y, BULLET)
+            self.bullets.append(bullet)
+            print(bullet)
 
     # def to move bullets
     def move(self, direction, player_vel):
@@ -92,8 +100,8 @@ class Player:
     # def for healthbar
 
 # class for bullet
-class Bullet():
-    def __init__(self,x ,y, img):
+class Bullet:
+    def __init__(self, x, y, img):
         self.x = x
         self.y = y
         self.img = img
@@ -101,6 +109,7 @@ class Bullet():
         
     def draw(self, window ):
         window.blit(self.img, (self.x, self.y))
+        
     # def for moving
     # def for draw
     # def for collision
@@ -123,10 +132,7 @@ def draw_gameboard(input):
 # def to draw battle map
 def draw_battlemap(input, yellow_player, blue_player, player_vel):
     """handles the battle map game"""
-    main_text = main_font.render(input['title'], 1, (255,255,255))
     keys = pygame.key.get_pressed()
-
-    WIN.blit(main_text, (50,50))
 
     # handles the player movement and limits the players movement to their perspective boxes
     if keys[pygame.K_a] and yellow_player.x + player_vel > 0:
@@ -145,15 +151,30 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
         blue_player.move('up', player_vel)
     if keys[pygame.K_DOWN]and blue_player.y + player_vel + PLAYER_H < HEIGHT:
         blue_player.move('down', player_vel)
+    if keys[pygame.K_c]:
+        yellow_player.shoot()
+    if keys[pygame.K_m]:
+        blue_player.shoot()
+
+    # draws the barbed wire/ sandbags/ ammo_count
+    WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
+    for key in input:
+        # draws yellows info
+        if key == 'yellow':
+           yellow_ammo_count = ammo_count_font.render(str(text_dict['3'][key]['ammo']),1, color_dict['yellow'])
+           WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
+           for i in range(0, text_dict['3'][key]['structures']):
+               WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
+        #    draws blues info
+        if key == 'blue':
+            blue_ammo_count = ammo_count_font.render(str(text_dict['3'][key]['ammo']),1,color_dict['blue'])
+            WIN.blit(blue_ammo_count, (WIDTH/2 + blue_ammo_count.get_width(), 10))
+            for i in range(0, text_dict['3'][key]['structures']):
+                WIN.blit(SAND_BAGS,(WIDTH - (SAND_BAGS.get_width() * (i+1)), 10))
 
     # draws the players on the screen
     yellow_player.draw(WIN)
     blue_player.draw(WIN)
-
-    # draws the barbed wire and sandbags
-    WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
-    WIN.blit(SAND_BAGS, (10,10))
-    
 
 # def to draw the window
 def draw_window(background, curr_index, yellow, blue, player_vel):
@@ -191,7 +212,9 @@ def main():
                 current_bg_index = 2
             if keys[pygame.K_RETURN]:
                 current_bg_index = 3
+                # draw_battlemap(BG_DICT['3'], yellow_player, blue_player, player_vel)
             if keys[pygame.K_y]:
                 current_bg_index = 1
-            
-main()
+
+if __name__ == '__main__':
+    main()
