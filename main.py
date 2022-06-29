@@ -1,3 +1,4 @@
+
 import pygame, os, random, time
 pygame.font.init()
 
@@ -10,7 +11,6 @@ pygame.display.set_caption("Chaos Kingdom!")
 # import font
 main_font = pygame.font.SysFont('comicsans', 30)
 ammo_count_font = pygame.font.SysFont('comicsans', 60)
-
 # set FPS and Vel for bullets and player movement
 FPS = 60
 # set W adn H for player size
@@ -23,7 +23,7 @@ BLUE_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets'
 # player 2
 YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
 # Bullet
-BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (PLAYER_W, PLAYER_H))
+BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (BULLET_W, BULLET_H))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
 SAND_BAGS = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sand_bags.png')), (90, 70))
@@ -63,14 +63,17 @@ text_dict = {
 ## Battlemap gameplay ##
 # player class
 class Player:
-    def __init__(self,x, y, player_img, health =100):
+    MAX_FIRE_RATE = 30
+    def __init__(self,x, y, player_img, color, health =100):
         self.x =x
         self.y =y
+        self.color =color
         self.player_img = player_img
         self.mask = pygame.mask.from_surface(self.player_img)
         self.bullets = []
         self.health = health
         self.max_health = 100
+        self.fire_rate = 0
 
     # def to draw a player on the screen
     def draw(self, window):
@@ -78,15 +81,36 @@ class Player:
         self.healthbar(window)
         for bullet in self.bullets:
             bullet.draw(window)
+            if bullet.x>WIDTH or bullet.x<0:
+                self.bullets.remove(bullet)
+                print(self.bullets)
 
     # def to shoot
-    def shoot(self):
-        if len(self.bullets):
-            bullet = Bullet(self.x, self.y, BULLET)
+    def shoot(self, inverse = False):
+        if len(self.bullets ) < text_dict['3'][self.color]['ammo']:
+            if inverse:
+                bullet = Bullet(self.x + YELLOW_PLAYER_IMG.get_width(), self.y + YELLOW_PLAYER_IMG.get_height()/2, pygame.transform.rotate(BULLET, 180), self.color)
+            else:
+                bullet = Bullet(self.x, self.y + BLUE_PLAYER_IMG.get_height()/2, BULLET, self.color)
             self.bullets.append(bullet)
-            print(bullet)
+            self.move_bullets()
+            self.fire_rate = 1
+
+    # def to slow shooting down
+    def cool_down(self):
+        if self.fire_rate >= self.MAX_FIRE_RATE:
+            self.fire_rate = 0
+        elif self.fire_rate > 0:
+            print(self.fire_rate)
+            self.fire_rate += 1
 
     # def to move bullets
+    def move_bullets(self, vel = 2):
+        self.cool_down()
+        for bullet in self.bullets:
+            bullet.move_b(self.color)
+
+    # def to move the player
     def move(self, direction, player_vel):
         if direction == 'right':
             self.x += player_vel
@@ -98,6 +122,7 @@ class Player:
             self.y += player_vel
 
     # def for being hit 
+
     # def for healthbar
     def healthbar(self, window):
         pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
@@ -105,19 +130,29 @@ class Player:
 
 # class for bullet
 class Bullet:
-    def __init__(self, x, y, img):
+    def __init__(self, x, y, img, color):
         self.x = x
         self.y = y
         self.img = img
+        self.color = color
         self.mask = pygame.mask.from_surface(self.img) 
         
+    # def for drawing bullets in self.list
     def draw(self, window ):
         window.blit(self.img, (self.x, self.y))
+        self.move_b()
         
-    # def for moving
-    # def for draw
+    # def for moving bullets
+    def move_b(self, vel = 2):
+        if self.color == 'yellow':
+            self.x += 2
+        elif self.color == 'blue':
+            self.x -= 2
+
     # def for collision
     # def for offscreen
+    def off_screen(self):
+        return (self.x > WIDTH or self.x <0)
 
 # def to draw the winner text
 
@@ -156,7 +191,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
     if keys[pygame.K_DOWN]and blue_player.y + player_vel + PLAYER_H < HEIGHT:
         blue_player.move('down', player_vel)
     if keys[pygame.K_c]:
-        yellow_player.shoot()
+        yellow_player.shoot(True)
     if keys[pygame.K_m]:
         blue_player.shoot()
 
@@ -198,8 +233,8 @@ def draw_window(background, curr_index, yellow, blue, player_vel):
 ### This is the process for filtering multiple screens ###
 def main():
     """This will handle the main events of the game"""
-    yellow_player = Player(50, 600 ,YELLOW_PLAYER_IMG)
-    blue_player = Player(900,100,BLUE_PLAYER_IMG)
+    yellow_player = Player(50, 600 ,YELLOW_PLAYER_IMG , 'yellow')
+    blue_player = Player(900,100,BLUE_PLAYER_IMG, 'blue')
     current_bg_index = 1
     player_vel = 4
     run = True
