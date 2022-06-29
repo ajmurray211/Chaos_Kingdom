@@ -74,26 +74,35 @@ class Player:
         self.health = health
         self.max_health = 100
         self.fire_rate = 0
+        self.mag = text_dict['3'][self.color]['ammo']
 
     # def to draw a player on the screen
     def draw(self, window):
         window.blit(self.player_img, (self.x,self.y))
         self.healthbar(window)
+        # self.reload_gun()
         for bullet in self.bullets:
             bullet.draw(window)
             if bullet.x>WIDTH or bullet.x<0:
                 self.bullets.remove(bullet)
                 print(self.bullets)
 
+    def reload_gun(self):
+        if self.mag == 1:
+            self.mag == 5
+        else:
+            self.mag -=1
+
     # def to shoot
     def shoot(self, inverse = False):
-        if len(self.bullets ) < text_dict['3'][self.color]['ammo']:
+        if len(self.bullets ) < self.mag:
             if inverse:
                 bullet = Bullet(self.x + YELLOW_PLAYER_IMG.get_width(), self.y + YELLOW_PLAYER_IMG.get_height()/2, pygame.transform.rotate(BULLET, 180), self.color)
             else:
                 bullet = Bullet(self.x, self.y + BLUE_PLAYER_IMG.get_height()/2, BULLET, self.color)
             self.bullets.append(bullet)
             self.move_bullets()
+            self.reload_gun()
             self.fire_rate = 1
 
     # def to slow shooting down
@@ -105,10 +114,10 @@ class Player:
             self.fire_rate += 1
 
     # def to move bullets
-    def move_bullets(self, vel = 2):
+    def move_bullets(self, vel = 7):
         self.cool_down()
         for bullet in self.bullets:
-            bullet.move_b(self.color)
+            bullet.move_b(vel)
 
     # def to move the player
     def move(self, direction, player_vel):
@@ -140,14 +149,14 @@ class Bullet:
     # def for drawing bullets in self.list
     def draw(self, window ):
         window.blit(self.img, (self.x, self.y))
-        self.move_b()
+        self.move_b(vel = 7)
         
     # def for moving bullets
-    def move_b(self, vel = 2):
+    def move_b(self, vel):
         if self.color == 'yellow':
-            self.x += 2
+            self.x += vel
         elif self.color == 'blue':
-            self.x -= 2
+            self.x -= vel
 
     # def for collision
     # def for offscreen
@@ -200,13 +209,13 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
     for key in input:
         # draws yellows info
         if key == 'yellow':
-           yellow_ammo_count = ammo_count_font.render(str(text_dict['3'][key]['ammo']),1, color_dict['yellow'])
+           yellow_ammo_count = ammo_count_font.render(str(yellow_player.mag),1, color_dict['yellow'])
            WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
            for i in range(0, text_dict['3'][key]['structures']):
                WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
         # draws blues info
         if key == 'blue':
-            blue_ammo_count = ammo_count_font.render(str(text_dict['3'][key]['ammo']),1,color_dict['blue'])
+            blue_ammo_count = ammo_count_font.render(str(blue_player.mag),1,color_dict['blue'])
             WIN.blit(blue_ammo_count, (WIDTH/2 + blue_ammo_count.get_width(), 10))
             for i in range(0, text_dict['3'][key]['structures']):
                 WIN.blit(SAND_BAGS,(WIDTH - (SAND_BAGS.get_width() * (i+1)), 10))
@@ -214,6 +223,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
     # draws the players on the screen
     yellow_player.draw(WIN)
     blue_player.draw(WIN)
+    pygame.display.update()
 
 # def to draw the window
 def draw_window(background, curr_index, yellow, blue, player_vel):
