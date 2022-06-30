@@ -102,17 +102,17 @@ class Player:
             self.reload_gun()
 
     def reload_gun(self):
-        timer_start = 0
-        timer_end = 120
-        clock = pygame.time.Clock()
+        self.fire_rate =1
+        self.mag = 5
+        # clock = pygame.time.Clock()
         print('hit reload')
-        for i in range(timer_start, timer_end):
-            clock.tick(FPS)
-            timer_start += 1
+        # for i in range(timer_start, timer_end):
+            # clock.tick(FPS)
+            # timer_start += 1
             # print(timer_start)
-            if timer_start == timer_end:
-                self.mag = 5
-                timer_start = 0
+            # if timer_start == timer_end:
+            #     self.mag = 5
+            #     timer_start = 0
 
     # def to slow shooting down
     def cool_down(self):
@@ -128,9 +128,6 @@ class Player:
             bullet.move_b(vel)
             if bullet.off_screen():
                 self.bullets.remove(bullet)
-            elif bullet.hit(self):
-                self.health -=10
-                self.bullets.remove(bullet)
 
     # def to move the player
     def move(self, direction, player_vel):
@@ -143,17 +140,20 @@ class Player:
         if direction == 'down':
             self.y += player_vel
 
+    # def for collision
+    def hit(self, round):
+        return fired_round(self,round)
+
     # def for healthbar
     def healthbar(self, window):
         pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
         pygame.draw.rect(window, color_dict['green'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width() * (self.health / self.max_health), 10))
 
-
 # checks to see if a plaer was hit by a bullet
 def fired_round(player, round):
     overlap_x = player.x - round.x
     overlap_y = player.y -round.y
-    return player.mask.overlap(round.mask, (overlap_x,overlap_y)) != None
+    return round.mask.overlap(player.mask, (overlap_x,overlap_y)) != None
 
 # class for bullet
 class Bullet:
@@ -175,10 +175,6 @@ class Bullet:
             self.x += vel
         elif self.color == 'blue':
             self.x -= vel
-
-    # def for collision
-    def hit(self, player):
-        return fired_round(self,player)
 
     # def for offscreen
     def off_screen(self):
@@ -225,6 +221,16 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
         yellow_player.shoot(True)
     if keys[pygame.K_m]:
         blue_player.shoot()
+    
+    # checks to see if a bullet hits a player 
+    for bullet in yellow_player.bullets:
+        if fired_round(blue_player, bullet):
+            blue_player.health -= 10 
+            yellow_player.bullets.remove(bullet)
+    for bullet in blue_player.bullets:
+        if yellow_player.hit(bullet):
+            yellow_player.health -= 10 
+            blue_player.bullets.remove(bullet)
 
     # draws the barbed wire/ sandbags/ ammo_count
     WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
