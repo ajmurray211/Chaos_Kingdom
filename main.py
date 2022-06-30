@@ -1,3 +1,4 @@
+
 import pygame, os, random, time
 pygame.font.init()
 
@@ -24,8 +25,10 @@ BULLET_W, BULLET_H = 10, 10
 ## Import pictures and set colors ##
 # player 1
 BLUE_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
+UNIT1_IMG = pygame.transform.flip(pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit1.png')), (PLAYER_W*2, PLAYER_H*2)), True,False )
 # player 2
 YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
+UNIT2_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit2.png')), (PLAYER_W *2, PLAYER_H*2))
 # Bullet
 BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (BULLET_W, BULLET_H))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
@@ -33,7 +36,7 @@ BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bar
 SAND_BAGS = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sand_bags.png')), (90, 70))
 # Background 
 MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'main_menu_bg.jpeg')), (WIDTH,HEIGHT))
-GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg.jpeg')), (WIDTH,HEIGHT))
+GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg.png')), (WIDTH,HEIGHT))
 BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battlemap_bg.png')), (WIDTH,HEIGHT))
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
@@ -215,6 +218,8 @@ def draw_main_menu(input):
     prompt = main_font.render(input['prompt'], 1, color_dict['white'])
     WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
     WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
+    WIN.blit(UNIT1_IMG, (WIDTH- (WIDTH/4),HEIGHT-200))
+    WIN.blit(UNIT2_IMG, (WIDTH/6,HEIGHT-200))
 
 def draw_gameboard(input):
     """"starts the gamboard commands"""
@@ -333,8 +338,8 @@ def main():
     """This will handle the main events of the game"""
     # initial defining
     clock = pygame.time.Clock()
-    yellow_player = Player(50, 600 ,YELLOW_PLAYER_IMG , 'yellow')
-    blue_player = Player(900,100,BLUE_PLAYER_IMG, 'blue')
+    yellow_player = Player(50, HEIGHT - (YELLOW_PLAYER_IMG.get_height() + 50) ,YELLOW_PLAYER_IMG , 'yellow')
+    blue_player = Player(WIDTH - (BLUE_PLAYER_IMG.get_width()+50),100,BLUE_PLAYER_IMG, 'blue')
     current_bg_index = 1
     player_vel = 6
     run = True
