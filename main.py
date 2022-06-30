@@ -76,10 +76,13 @@ class Player:
         self.player_img = player_img
         self.mask = pygame.mask.from_surface(self.player_img)
         self.bullets = []
+        self.cover_built = []
         self.health = health
         self.max_health = 100
         self.fire_rate = 0
+        self.build_rate = 0
         self.mag = text_dict['3'][self.color]['ammo']
+        self.cover_count =text_dict['3'][self.color]['structures']
 
     # def to draw a player on the screen
     def draw(self, window):
@@ -88,6 +91,8 @@ class Player:
         self.move_bullets()
         for bullet in self.bullets:
             bullet.draw(window)
+        for cover in self.cover_built:
+            cover.draw()
 
     # def to shoot
     def shoot(self, inverse = False):
@@ -147,6 +152,19 @@ class Player:
     def hit(self, round):
         return fired_round(self,round)
 
+    # def to handle placing cover
+    def build(self, inverse = False):
+        if self.fire_rate == 0:
+            if len(self.cover_built)<3:
+                if inverse:
+                    cover = Structure(self.x, self.y,pygame.transform.rotate(SAND_BAGS, 180))
+                else:
+                    cover = Structure(self.x, self.y, SAND_BAGS)
+                self.cover_built.append(cover)
+                for cover in self.cover_built:
+                    cover.draw()
+            self.fire_rate = 1
+
     # def for healthbar
     def healthbar(self, window):
         pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
@@ -183,9 +201,21 @@ class Bullet:
     def off_screen(self):
         return not(self.x < WIDTH and self.x >0)
 
-# def to draw the winner text
+        # def for collision
+    def hit(self, round):
+        return fired_round(self,round)
 
+class Structure:
+    def __init__(self, x, y, img):
+        self.x = x 
+        self.y =y 
+        self.img = img
+        self.health = 3
 
+    def draw(self):
+          WIN.blit(self.img, (self.x, self.y))
+        # pygame.display.update()
+        
 # def to draw main_menu
 def draw_main_menu(input):
     title = main_font.render(input['title'], 1, color_dict['white'])
@@ -207,10 +237,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
         WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
         pygame.display.update()
         pygame.time.delay(5000)
-        curr_index = 2
-
-
-    """handles the battle map game"""
+        pygame.QUIT
 
     keys = pygame.key.get_pressed()
 
@@ -231,6 +258,10 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
         blue_player.move('up', player_vel)
     if keys[pygame.K_DOWN]and blue_player.y + player_vel + PLAYER_H < HEIGHT:
         blue_player.move('down', player_vel)
+    if keys[pygame.K_v]:
+        yellow_player.build()
+    if keys[pygame.K_n]:
+        blue_player.build(True)
     if keys[pygame.K_c]:
         yellow_player.shoot(True)
     if keys[pygame.K_m]:
@@ -238,7 +269,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
     
     # checks to see if a bullet hits a player 
     for bullet in yellow_player.bullets:
-        if fired_round(blue_player, bullet):
+        if blue_player.hit(bullet):
             blue_player.health -= 10 
             yellow_player.bullets.remove(bullet)
     for bullet in blue_player.bullets:
@@ -324,5 +355,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    
