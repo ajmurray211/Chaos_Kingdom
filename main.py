@@ -1,4 +1,3 @@
-
 import pygame, os, random, time
 pygame.font.init()
 
@@ -7,7 +6,10 @@ WIDTH , HEIGHT  = 1000, 700
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Chaos Kingdom!")
 
-# set border 
+# events to handle hits
+YELLOW_HIT = pygame.USEREVENT +1
+BLUE_HIT = pygame.USEREVENT +2
+
 # import font
 main_font = pygame.font.SysFont('comicsans', 30)
 ammo_count_font = pygame.font.SysFont('comicsans', 60)
@@ -80,37 +82,43 @@ class Player:
     def draw(self, window):
         window.blit(self.player_img, (self.x,self.y))
         self.healthbar(window)
-        # self.reload_gun()
+        self.move_bullets()
         for bullet in self.bullets:
             bullet.draw(window)
-            if bullet.x>WIDTH or bullet.x<0:
-                self.bullets.remove(bullet)
-                print(self.bullets)
-
-    def reload_gun(self):
-        if self.mag == 1:
-            self.mag == 5
-        else:
-            self.mag -=1
 
     # def to shoot
     def shoot(self, inverse = False):
-        if len(self.bullets ) < self.mag:
+        if self.mag > 0 and self.fire_rate == 0:
             if inverse:
                 bullet = Bullet(self.x + YELLOW_PLAYER_IMG.get_width(), self.y + YELLOW_PLAYER_IMG.get_height()/2, pygame.transform.rotate(BULLET, 180), self.color)
             else:
                 bullet = Bullet(self.x, self.y + BLUE_PLAYER_IMG.get_height()/2, BULLET, self.color)
             self.bullets.append(bullet)
-            self.move_bullets()
-            self.reload_gun()
+            print(self.mag)
+            self.mag -= 1
             self.fire_rate = 1
+        elif self.mag == 1:
+            print('hit elif')
+            self.reload_gun()
+
+    def reload_gun(self):
+        timer_start = 0
+        timer_end = 120
+        clock = pygame.time.Clock()
+        print('hit reload')
+        for i in range(timer_start, timer_end):
+            clock.tick(FPS)
+            timer_start += 1
+            # print(timer_start)
+            if timer_start == timer_end:
+                self.mag = 5
+                timer_start = 0
 
     # def to slow shooting down
     def cool_down(self):
         if self.fire_rate >= self.MAX_FIRE_RATE:
             self.fire_rate = 0
         elif self.fire_rate > 0:
-            print(self.fire_rate)
             self.fire_rate += 1
 
     # def to move bullets
@@ -118,6 +126,11 @@ class Player:
         self.cool_down()
         for bullet in self.bullets:
             bullet.move_b(vel)
+            if bullet.off_screen():
+                self.bullets.remove(bullet)
+            elif bullet.hit(self):
+                self.health -=10
+                self.bullets.remove(bullet)
 
     # def to move the player
     def move(self, direction, player_vel):
@@ -130,12 +143,17 @@ class Player:
         if direction == 'down':
             self.y += player_vel
 
-    # def for being hit 
-
     # def for healthbar
     def healthbar(self, window):
         pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
         pygame.draw.rect(window, color_dict['green'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width() * (self.health / self.max_health), 10))
+
+
+# checks to see if a plaer was hit by a bullet
+def fired_round(player, round):
+    overlap_x = player.x - round.x
+    overlap_y = player.y -round.y
+    return player.mask.overlap(round.mask, (overlap_x,overlap_y)) != None
 
 # class for bullet
 class Bullet:
@@ -159,9 +177,12 @@ class Bullet:
             self.x -= vel
 
     # def for collision
+    def hit(self, player):
+        return fired_round(self,player)
+
     # def for offscreen
     def off_screen(self):
-        return (self.x > WIDTH or self.x <0)
+        return not(self.x < WIDTH and self.x >0)
 
 # def to draw the winner text
 
@@ -180,6 +201,7 @@ def draw_gameboard(input):
 # def to draw battle map
 def draw_battlemap(input, yellow_player, blue_player, player_vel):
     """handles the battle map game"""
+
     keys = pygame.key.get_pressed()
 
     # handles the player movement and limits the players movement to their perspective boxes
@@ -213,6 +235,7 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
            WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
            for i in range(0, text_dict['3'][key]['structures']):
                WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
+
         # draws blues info
         if key == 'blue':
             blue_ammo_count = ammo_count_font.render(str(blue_player.mag),1,color_dict['blue'])
@@ -254,6 +277,10 @@ def main():
         draw_window(BG_DICT[str(current_bg_index)], current_bg_index, yellow_player, blue_player, player_vel)
         # default quit function in loop
         for event in pygame.event.get():
+            if event.type == YELLOW_HIT:
+                yellow_player.health -= 10
+            if event.type == BLUE_HIT:
+                blue_player.health -= 10
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE] or event.type == pygame.QUIT:
                 run = False
