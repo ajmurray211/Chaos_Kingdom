@@ -6,7 +6,7 @@
 |Day 0| Project Research | Complete
 |Day 1| Wireframes / Priority Matrix / Timeline / Approval | Complete
 |Day 2| Core Application Structure for main menu, game board, and battle map | Complete
-|Day 3| Battle map gameplay | Incomplete
+|Day 3| Battle map gameplay | Complete
 |Day 4| Game board gameplay | Incomplete
 |Day 5| Custom controls or save/load feature| Incomplete
 |Day 6| Multiplayer  | Incomplete
@@ -27,7 +27,7 @@ This is a game that allows two players to move units on a map and if those two u
 - [Link](https://imgur.com/pA9CbR9)
 
 ### MVP
-- Main menu
+- Main menu starts game 
 - Game board launches Battle map 
 - Battle map
 - Battle map gameplay and results displayed
