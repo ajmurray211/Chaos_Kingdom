@@ -13,6 +13,8 @@ BLUE_HIT = pygame.USEREVENT +2
 # import font
 main_font = pygame.font.SysFont('comicsans', 30)
 ammo_count_font = pygame.font.SysFont('comicsans', 60)
+WINNER_FONT = pygame.font.SysFont('comicsans', 100)
+
 # set FPS and Vel for bullets and player movement
 FPS = 60
 # set W adn H for player size
@@ -58,7 +60,8 @@ text_dict = {
             'ammo': 5,
             'structures': 3,
             'health': 100
-        }
+        },
+        'winner':''
     }
 }
 
@@ -182,6 +185,7 @@ class Bullet:
 
 # def to draw the winner text
 
+
 # def to draw main_menu
 def draw_main_menu(input):
     title = main_font.render(input['title'], 1, color_dict['white'])
@@ -195,7 +199,17 @@ def draw_gameboard(input):
     WIN.blit(main_text, (10,10))
 
 # def to draw battle map
-def draw_battlemap(input, yellow_player, blue_player, player_vel):
+def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
+
+    def draw_winner(text):
+        """handles player winning"""
+        draw_text = WINNER_FONT.render(text, 1, color_dict['white'])
+        WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
+        pygame.display.update()
+        pygame.time.delay(5000)
+        curr_index = 2
+
+
     """handles the battle map game"""
 
     keys = pygame.key.get_pressed()
@@ -252,10 +266,20 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel):
     # draws the players on the screen
     yellow_player.draw(WIN)
     blue_player.draw(WIN)
+
+    # update winner
+    winner_text = ''
+    if yellow_player.health == 0:
+        winner_text = 'Blue player wins!!'
+    if blue_player.health == 0:
+        winner_text = 'Yellow player wins!!'
+    if winner_text != '':
+        draw_winner(winner_text)
+
     pygame.display.update()
 
 # def to draw the window
-def draw_window(background, curr_index, yellow, blue, player_vel):
+def draw_window(background, curr_index, yellow, blue, player_vel,):
     """This method updates the window"""
     WIN.blit(background, (0,0))
 
@@ -265,7 +289,7 @@ def draw_window(background, curr_index, yellow, blue, player_vel):
     if curr_index == 2:
         draw_gameboard(text_dict['2'])
     if curr_index == 3:
-        draw_battlemap(text_dict['3'], yellow, blue, player_vel)
+        draw_battlemap(text_dict['3'], yellow, blue, player_vel, curr_index)
 
     pygame.display.update()
 
@@ -300,3 +324,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    
