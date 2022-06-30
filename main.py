@@ -52,12 +52,12 @@ text_dict = {
     '3':{   
         'title': "Battle map",
         'blue':{
-            'ammo': 5,
+            'ammo': 15,
             'structures': 3,
             'health': 100
         },
         'yellow':{
-            'ammo': 5,
+            'ammo': 15,
             'structures': 3,
             'health': 100
         },
@@ -66,9 +66,9 @@ text_dict = {
 }
 
 ## Battlemap gameplay ##
-# player class
+
 class Player:
-    MAX_FIRE_RATE = 30
+    MAX_FIRE_RATE = 25
     def __init__(self,x, y, player_img, color, health =100):
         self.x =x
         self.y =y
@@ -84,8 +84,8 @@ class Player:
         self.mag = text_dict['3'][self.color]['ammo']
         self.cover_count =text_dict['3'][self.color]['structures']
 
-    # def to draw a player on the screen
     def draw(self, window):
+        """draws the player, and calls bullets, structures and health draw methods"""
         window.blit(self.player_img, (self.x,self.y))
         self.healthbar(window)
         self.move_bullets()
@@ -94,9 +94,9 @@ class Player:
         for cover in self.cover_built:
             cover.draw()
 
-    # def to shoot
     def shoot(self, inverse = False):
-        if self.mag > 0 and self.fire_rate == 0:
+        """shoots a bullet"""
+        if self.mag >= 0 and self.fire_rate == 0:
             if inverse:
                 bullet = Bullet(self.x + YELLOW_PLAYER_IMG.get_width(), self.y + YELLOW_PLAYER_IMG.get_height()/2, pygame.transform.rotate(BULLET, 180), self.color)
             else:
@@ -106,39 +106,30 @@ class Player:
             self.mag -= 1
             self.fire_rate = 1
         elif self.mag == 1:
-            print('hit elif')
             self.reload_gun()
 
     def reload_gun(self):
-        self.fire_rate =1
-        self.mag = 5
-        # clock = pygame.time.Clock()
+        """relaods the gun after a set amount of time"""
+        self.mag = 15
         print('hit reload')
-        # for i in range(timer_start, timer_end):
-            # clock.tick(FPS)
-            # timer_start += 1
-            # print(timer_start)
-            # if timer_start == timer_end:
-            #     self.mag = 5
-            #     timer_start = 0
 
-    # def to slow shooting down
     def cool_down(self):
+        """sets a cooldown for shooting"""
         if self.fire_rate >= self.MAX_FIRE_RATE:
             self.fire_rate = 0
         elif self.fire_rate > 0:
             self.fire_rate += 1
 
-    # def to move bullets
     def move_bullets(self, vel = 7):
+        """moves a players bullets, until it is off screen then it deletes"""
         self.cool_down()
         for bullet in self.bullets:
             bullet.move_b(vel)
             if bullet.off_screen():
                 self.bullets.remove(bullet)
 
-    # def to move the player
     def move(self, direction, player_vel):
+        """controls a players movement"""
         if direction == 'right':
             self.x += player_vel
         if direction == 'left':
@@ -148,33 +139,33 @@ class Player:
         if direction == 'down':
             self.y += player_vel
 
-    # def for collision
     def hit(self, round):
+        """checks to see if a hit has happened"""
         return fired_round(self,round)
 
-    # def to handle placing cover
     def build(self, inverse = False):
+        """Places a pice of cover down"""
         if self.fire_rate == 0:
-            if len(self.cover_built)<3:
+            if len(self.cover_built) < 3 :
                 if inverse:
-                    cover = Structure(self.x, self.y,pygame.transform.rotate(SAND_BAGS, 180))
+                    cover = Structure(self.x - BLUE_PLAYER_IMG.get_width(), self.y + 10,pygame.transform.rotate(SAND_BAGS, 180))
                 else:
-                    cover = Structure(self.x, self.y, SAND_BAGS)
+                    cover = Structure(self.x + YELLOW_PLAYER_IMG.get_width(), self.y, SAND_BAGS)
                 self.cover_built.append(cover)
                 for cover in self.cover_built:
                     cover.draw()
             self.fire_rate = 1
 
-    # def for healthbar
     def healthbar(self, window):
+        """braws a healthbar for the player"""
         pygame.draw.rect(window, color_dict['red'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width(), 10))
         pygame.draw.rect(window, color_dict['green'], (self.x, self.y + self.player_img.get_height() + 10, self.player_img.get_width() * (self.health / self.max_health), 10))
 
-# checks to see if a plaer was hit by a bullet
-def fired_round(player, round):
-    overlap_x = player.x - round.x
-    overlap_y = player.y -round.y
-    return round.mask.overlap(player.mask, (overlap_x,overlap_y)) != None
+def fired_round(obj, round):
+    """checks to see if two masks overlap"""
+    overlap_x = obj.x - round.x
+    overlap_y = obj.y -round.y
+    return round.mask.overlap(obj.mask, (overlap_x,overlap_y)) != None
 
 # class for bullet
 class Bullet:
@@ -185,25 +176,21 @@ class Bullet:
         self.color = color
         self.mask = pygame.mask.from_surface(self.img) 
         
-    # def for drawing bullets in self.list
     def draw(self, window ):
+        """draws the bullets"""
         window.blit(self.img, (self.x, self.y))
         self.move_b(vel = 7)
         
-    # def for moving bullets
     def move_b(self, vel):
+        """moves the bullet based on player color"""
         if self.color == 'yellow':
             self.x += vel
         elif self.color == 'blue':
             self.x -= vel
 
-    # def for offscreen
     def off_screen(self):
+        """checks to see if a bullet leavs the screen"""
         return not(self.x < WIDTH and self.x >0)
-
-        # def for collision
-    def hit(self, round):
-        return fired_round(self,round)
 
 class Structure:
     def __init__(self, x, y, img):
@@ -211,25 +198,31 @@ class Structure:
         self.y =y 
         self.img = img
         self.health = 3
+        self.mask = pygame.mask.from_surface(self.img)
+        self.health = 20
 
     def draw(self):
-          WIN.blit(self.img, (self.x, self.y))
-        # pygame.display.update()
+        """draws the cover"""
+        WIN.blit(self.img, (self.x, self.y))
         
-# def to draw main_menu
+    def hit(self, round):
+        """checks to see in a structure was hit"""
+        return fired_round(self,round)
+
 def draw_main_menu(input):
+    """draws the main menu and runs the commands"""
     title = main_font.render(input['title'], 1, color_dict['white'])
     prompt = main_font.render(input['prompt'], 1, color_dict['white'])
     WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
     WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
 
-# def to draw gameboard
 def draw_gameboard(input):
+    """"starts the gamboard commands"""
     main_text = main_font.render(input['title'], 1, (255,255,255))
     WIN.blit(main_text, (10,10))
 
-# def to draw battle map
-def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
+def draw_battlemap(input, yellow_player, blue_player, player_vel):
+    """starts the battlemap commands"""
 
     def draw_winner(text):
         """handles player winning"""
@@ -267,15 +260,27 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
     if keys[pygame.K_m]:
         blue_player.shoot()
     
-    # checks to see if a bullet hits a player 
+    # checks to see if a bullet hits a player or structure
     for bullet in yellow_player.bullets:
         if blue_player.hit(bullet):
             blue_player.health -= 10 
             yellow_player.bullets.remove(bullet)
+        for build in blue_player.cover_built:
+            if build.hit(bullet) and build.health > 0:
+                build.health -= 10 
+                yellow_player.bullets.remove(bullet)
+            elif build.health <= 0:
+                blue_player.cover_built.remove(build)
     for bullet in blue_player.bullets:
         if yellow_player.hit(bullet):
             yellow_player.health -= 10 
             blue_player.bullets.remove(bullet)
+        for build in yellow_player.cover_built:
+            if build.hit(bullet) and build.health > 0:
+                build.health -= 10 
+                blue_player.bullets.remove(bullet)
+            elif build.health <= 0:
+                yellow_player.cover_built.remove(build)
 
     # draws the barbed wire/ sandbags/ ammo_count
     WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
@@ -284,14 +289,14 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
         if key == 'yellow':
            yellow_ammo_count = ammo_count_font.render(str(yellow_player.mag),1, color_dict['yellow'])
            WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
-           for i in range(0, text_dict['3'][key]['structures']):
+           for i in range(0, 3-len(yellow_player.cover_built)):
                WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
 
         # draws blues info
         if key == 'blue':
             blue_ammo_count = ammo_count_font.render(str(blue_player.mag),1,color_dict['blue'])
             WIN.blit(blue_ammo_count, (WIDTH/2 + blue_ammo_count.get_width(), 10))
-            for i in range(0, text_dict['3'][key]['structures']):
+            for i in range(0, 3-len(blue_player.cover_built)):
                 WIN.blit(SAND_BAGS,(WIDTH - (SAND_BAGS.get_width() * (i+1)), 10))
 
     # draws the players on the screen
@@ -309,7 +314,6 @@ def draw_battlemap(input, yellow_player, blue_player, player_vel, curr_index):
 
     pygame.display.update()
 
-# def to draw the window
 def draw_window(background, curr_index, yellow, blue, player_vel,):
     """This method updates the window"""
     WIN.blit(background, (0,0))
@@ -320,21 +324,24 @@ def draw_window(background, curr_index, yellow, blue, player_vel,):
     if curr_index == 2:
         draw_gameboard(text_dict['2'])
     if curr_index == 3:
-        draw_battlemap(text_dict['3'], yellow, blue, player_vel, curr_index)
+        draw_battlemap(text_dict['3'], yellow, blue, player_vel)
 
     pygame.display.update()
 
 ### This is the process for filtering multiple screens ###
 def main():
     """This will handle the main events of the game"""
+    # initial defining
+    clock = pygame.time.Clock()
     yellow_player = Player(50, 600 ,YELLOW_PLAYER_IMG , 'yellow')
     blue_player = Player(900,100,BLUE_PLAYER_IMG, 'blue')
     current_bg_index = 1
-    player_vel = 4
+    player_vel = 6
     run = True
 
     while run:
         # draw main menu background
+        clock.tick(FPS)
         draw_window(BG_DICT[str(current_bg_index)], current_bg_index, yellow_player, blue_player, player_vel)
         # default quit function in loop
         for event in pygame.event.get():
@@ -353,5 +360,6 @@ def main():
             if keys[pygame.K_y]:
                 current_bg_index = 1
 
+# only runs the game if the file name is "main"
 if __name__ == '__main__':
     main()
