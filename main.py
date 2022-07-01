@@ -7,10 +7,11 @@ WIDTH , HEIGHT  = 1000, 700
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Chaos Kingdom!")
 
-# import font
+# import font 
 main_font = pygame.font.Font('assets/IMMORTAL.ttf', 30)
-ammo_count_font = pygame.font.SysFont('assets/IMMORTAL.ttf', 60)
-WINNER_FONT = pygame.font.SysFont('assets/IMMORTAL.ttf', 100)
+city_font = pygame.font.Font('assets/IMMORTAL.ttf', 20)
+ammo_count_font = pygame.font.Font('assets/IMMORTAL.ttf', 60)
+winner_font = pygame.font.Font('assets/IMMORTAL.ttf', 100)
 
 # set FPS and Vel for arrows and player movement
 FPS = 60
@@ -42,7 +43,7 @@ BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', '
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
 # color
-color_dict = {'white':(255,255,255), 'green':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
+color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
@@ -123,7 +124,7 @@ city_dict = {
         'y_cord': 450,
         'city_num': 9
     },
-    "city_name": {
+    "Uleron": {
         'owner': 'None',
         'x_cord': 374,
         'y_cord': 478,
@@ -304,24 +305,34 @@ def draw_main_menu(input = 1):
     prompt = main_font.render(text_dict[str(input)]['prompt'], 1, color_dict['white'])
     WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
     WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
-    WIN.blit(UNIT1_IMG, (WIDTH- (WIDTH/4),HEIGHT-200))
-    WIN.blit(UNIT2_IMG, (WIDTH/6,HEIGHT-200))
 
 def draw_gameboard():
     """"starts the gamboard commands"""
-    red = 0
-    green = 0
     run=True
+    clock = pygame.time.Clock()
+    city_list = list(city_dict.keys())
     while run:
+        red_owned = []
+        green_owned = []
+        clock.tick(FPS)
         WIN.blit(GAME_BOARD_BG, (0,0))
-        # assigns flags to citys by color
-        for city in city_dict:
-            if city_dict[city]['owner'] == 'red':
-                WIN.blit(UNIT1_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
-            elif city_dict[city]['owner'] == 'green':
-                WIN.blit(UNIT2_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
+        # assigns name and flags to cities
+        for name in city_dict:
+            if city_dict[name]['owner'] == 'red' and name not in red_owned:
+                red_owned.append(name)
+            elif city_dict[name]['owner'] == 'green' and name not in green_owned:
+                green_owned.append(name)
+                      
+            city_name = city_font.render(name,1,color_dict['white'])
+            if city_dict[name]['owner'] == 'red':
+                WIN.blit(UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
+            elif city_dict[name]['owner'] == 'green':
+                WIN.blit(UNIT2_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
             else:
-                WIN.blit(NEUTRAL_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
+                WIN.blit(NEUTRAL_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'], city_dict[name]['y_cord'] - city_name.get_height() + 10))
 
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -330,10 +341,10 @@ def draw_gameboard():
             if keys[pygame.K_6]:
                 draw_battlemap(text_dict['3'])
 
-            green_cities = main_font.render(str(green),1, color_dict['black'])
-            WIN.blit(green_cities, (900, HEIGHT - main_font.get_height()- 20))
-            red_cities = main_font.render(str(red),1, color_dict['black'])
-            WIN.blit(red_cities, (100, HEIGHT - main_font.get_height() - 20))
+            green_cities = ammo_count_font.render(str(len(green_owned)),1, color_dict['black'])
+            WIN.blit(green_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
+            red_cities = ammo_count_font.render(str(len(red_owned)),1, color_dict['black'])
+            WIN.blit(red_cities, (100, HEIGHT - ammo_count_font.get_height() - 10))
             pygame.display.update()
 
 def draw_battlemap(input):
@@ -343,12 +354,14 @@ def draw_battlemap(input):
     player_vel = 6
     winner_text = ''
     run = True
+    pygame.display.update()
+
 
     while winner_text == '' and run:
         WIN.blit(BATTLEMAP_BG,(0,0))
         def draw_winner(text):
             """handles player winning"""
-            draw_text = WINNER_FONT.render(text, 1, color_dict['white'])
+            draw_text = winner_font.render(text, 1, color_dict['white'])
             WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
             pygame.display.update()
             pygame.time.delay(5000)
