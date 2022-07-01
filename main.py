@@ -1,5 +1,4 @@
-
-
+from typing import Type
 import pygame, os, random, time
 pygame.font.init()
 
@@ -24,12 +23,16 @@ PLAYER_W, PLAYER_H = 70, 70
 BULLET_W, BULLET_H = 10, 10
 
 ## Import pictures and set colors ##
-# player 1
+NEUTRAL_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_flag.png')), (50, 40))
+# player 1 - red
 BLUE_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
 UNIT1_IMG = pygame.transform.flip(pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit1.png')), (PLAYER_W*2, PLAYER_H*2)), True,False )
-# player 2
+UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_flag.png')), (50, 40))
+# player 2 - green
 YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
 UNIT2_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit2.png')), (PLAYER_W *2, PLAYER_H*2))
+UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_flag.png')), (50, 40))
+
 # Bullet
 BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (BULLET_W, BULLET_H))
 BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
@@ -37,7 +40,7 @@ BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bar
 SAND_BAGS = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sand_bags.png')), (90, 70))
 # Background 
 MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'main_menu_bg.jpeg')), (WIDTH,HEIGHT))
-GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg.png')), (WIDTH,HEIGHT))
+GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg1.jpeg')), (WIDTH,HEIGHT))
 BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battlemap_bg.png')), (WIDTH,HEIGHT))
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
@@ -46,12 +49,12 @@ color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'bl
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
-        "prompt": "Press any key to start",
+        "prompt": "Press the spacebar to start",
         'size': 50
     },
     '2':{
-        'title': 'Game Board',
-        'size': 100
+        'title': 'How to play',
+        'prompt': 'This is where the dicription of the game and how everything works will go.'
     },
     '3':{   
         'title': "Battle map",
@@ -66,6 +69,86 @@ text_dict = {
             'health': 100
         },
         'winner':''
+    }
+}
+city_dict = {
+    "Utrila": {
+        'owner': 'red',
+        'x_cord': 836,
+        'y_cord': 220,
+        'city_num': 1
+    },
+    "Gishire": {
+        'owner': 'green',
+        'x_cord': 95,
+        'y_cord': 300,
+        'city_num': 2
+    },
+    "Tetgas": {
+        'owner': 'None',
+        'x_cord': 320,
+        'y_cord': 212,
+        'city_num': 3
+    },
+    "Oreledo": {
+        'owner': 'None',
+        'x_cord': 395,
+        'y_cord': 300,
+        'city_num': 4
+    },
+    "Plecdiff": {
+        'owner': 'None',
+        'x_cord': 460,
+        'y_cord': 185,
+        'city_num': 5
+    },
+    "Strinta": {
+        'owner': 'None',
+        'x_cord': 518,
+        'y_cord': 242,
+        'city_num': 6
+    },
+    "Yido": {
+        'owner': 'None',
+        'x_cord': 830,
+        'y_cord': 100,
+        'city_num': 7
+    },
+    "Ipria": {
+        'owner': 'None',
+        'x_cord': 627,
+        'y_cord': 343,
+        'city_num': 8
+    },
+    "Zhento": {
+        'owner': 'None',
+        'x_cord': 765,
+        'y_cord': 450,
+        'city_num': 9
+    },
+    "city_name": {
+        'owner': 'None',
+        'x_cord': 374,
+        'y_cord': 478,
+        'city_num': 10
+    },
+    "Inphis": {
+        'owner': 'None',
+        'x_cord': 334,
+        'y_cord': 347,
+        'city_num': 11
+    },
+    "Glavine": {
+        'owner': 'None',
+        'x_cord': 295,
+        'y_cord': 317,
+        'city_num': 12
+    },
+    "Sheaford": {
+        'owner': 'None',
+        'x_cord': 205,
+        'y_cord': 400,
+        'city_num': 13
     }
 }
 
@@ -213,11 +296,11 @@ class Structure:
         """checks to see in a structure was hit"""
         return fired_round(self,round)
 
-def draw_main_menu():
+def draw_main_menu(input = 1):
     """draws the main menu and runs the commands"""
     WIN.blit(MAIN_MENU_BG, (0,0))
-    title = main_font.render(text_dict['1']['title'], 1, color_dict['white'])
-    prompt = main_font.render(text_dict['1']['prompt'], 1, color_dict['white'])
+    title = main_font.render(text_dict[str(input)]['title'], 1, color_dict['white'])
+    prompt = main_font.render(text_dict[str(input)]['prompt'], 1, color_dict['white'])
     WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
     WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
     WIN.blit(UNIT1_IMG, (WIDTH- (WIDTH/4),HEIGHT-200))
@@ -227,8 +310,17 @@ def draw_gameboard():
     """"starts the gamboard commands"""
     run=True
     while run:
-        keys = pygame.key.get_pressed()
         WIN.blit(GAME_BOARD_BG, (0,0))
+        # assigns flags to citys by color
+        for city in city_dict:
+            if city_dict[city]['owner'] == 'red':
+                WIN.blit(UNIT1_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
+            elif city_dict[city]['owner'] == 'green':
+                WIN.blit(UNIT2_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
+            else:
+                WIN.blit(NEUTRAL_FLAG, (city_dict[city]['x_cord'],city_dict[city]['y_cord']))
+
+        keys = pygame.key.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
                 run = False
@@ -236,10 +328,8 @@ def draw_gameboard():
                 draw_battlemap(text_dict['3'])
             pygame.display.update()
 
-
 def draw_battlemap(input):
     """starts the battlemap commands"""
-  
     yellow_player = Player(50, HEIGHT - (YELLOW_PLAYER_IMG.get_height() + 50) ,YELLOW_PLAYER_IMG , 'yellow')
     blue_player = Player(WIDTH - (BLUE_PLAYER_IMG.get_width()+50),100,BLUE_PLAYER_IMG, 'blue')
     player_vel = 6
@@ -352,6 +442,8 @@ def main():
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE] or event.type == pygame.QUIT:
                 run = False
+            if keys[pygame.K_RSHIFT]:
+                draw_main_menu(2)
             if keys[pygame.K_SPACE]:
                 draw_gameboard()
 
