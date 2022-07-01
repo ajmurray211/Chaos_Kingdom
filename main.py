@@ -1,51 +1,48 @@
-from typing import Type
 import pygame, os, random, time
 pygame.font.init()
 
+###################### Game settings and imports section ###############################
 # set a window
 WIDTH , HEIGHT  = 1000, 700
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Chaos Kingdom!")
 
-# events to handle hits
-YELLOW_HIT = pygame.USEREVENT +1
-BLUE_HIT = pygame.USEREVENT +2
-
 # import font
-main_font = pygame.font.SysFont('comicsans', 30)
-ammo_count_font = pygame.font.SysFont('comicsans', 60)
-WINNER_FONT = pygame.font.SysFont('comicsans', 100)
+main_font = pygame.font.Font('assets/IMMORTAL.ttf', 30)
+ammo_count_font = pygame.font.SysFont('assets/IMMORTAL.ttf', 60)
+WINNER_FONT = pygame.font.SysFont('assets/IMMORTAL.ttf', 100)
 
-# set FPS and Vel for bullets and player movement
+# set FPS and Vel for arrows and player movement
 FPS = 60
 # set W adn H for player size
 PLAYER_W, PLAYER_H = 70, 70
-BULLET_W, BULLET_H = 10, 10
+ARROW_W, ARROW_H = 40, 10
 
 ## Import pictures and set colors ##
 NEUTRAL_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_flag.png')), (50, 40))
 # player 1 - red
-BLUE_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_player.png')), (PLAYER_W, PLAYER_H))
+RED_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_player.png')), (PLAYER_W, PLAYER_H))
 UNIT1_IMG = pygame.transform.flip(pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit1.png')), (PLAYER_W*2, PLAYER_H*2)), True,False )
 UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_flag.png')), (50, 40))
+
 # player 2 - green
-YELLOW_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'yellow_player.png')), (PLAYER_W, PLAYER_H))
+GREEN_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_player.png')), (PLAYER_W, PLAYER_H))
 UNIT2_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit2.png')), (PLAYER_W *2, PLAYER_H*2))
 UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_flag.png')), (50, 40))
 
-# Bullet
-BULLET = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bullet.png')), (BULLET_W, BULLET_H))
-BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
-BARB_WIRE = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'barb_wire.png')), (40, HEIGHT))
-SAND_BAGS = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'sand_bags.png')), (90, 70))
+# arrows and barriers
+ARROW1 = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'arrow1.png')), (ARROW_W, ARROW_H))
+RIVER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'river.png')), (120, HEIGHT))
+BOLDER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bolder.png')), (90, 70))
+
 # Background 
-MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'main_menu_bg.jpeg')), (WIDTH,HEIGHT))
+MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'title_bg5.png')), (WIDTH,HEIGHT))
 GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg1.jpeg')), (WIDTH,HEIGHT))
-BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battlemap_bg.png')), (WIDTH,HEIGHT))
+BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battle_map_bg.png')), (WIDTH,HEIGHT))
 BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
 
 # color
-color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
+color_dict = {'white':(255,255,255), 'green':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
@@ -58,12 +55,12 @@ text_dict = {
     },
     '3':{   
         'title': "Battle map",
-        'blue':{
+        'red':{
             'ammo': 15,
             'structures': 3,
             'health': 100
         },
-        'yellow':{
+        'green':{
             'ammo': 15,
             'structures': 3,
             'health': 100
@@ -152,17 +149,20 @@ city_dict = {
     }
 }
 
-## Battlemap gameplay ##
+###################### end of Game settings and imports section ###############################
 
+
+
+########################### Battlemap gameplay ################################
 class Player:
-    MAX_FIRE_RATE = 25
+    MAX_FIRE_RATE = 35
     def __init__(self,x, y, player_img, color, health =100):
         self.x =x
         self.y =y
         self.color =color
         self.player_img = player_img
         self.mask = pygame.mask.from_surface(self.player_img)
-        self.bullets = []
+        self.arrows = []
         self.cover_built = []
         self.health = health
         self.max_health = 100
@@ -172,23 +172,23 @@ class Player:
         self.cover_count =text_dict['3'][self.color]['structures']
 
     def draw(self, window):
-        """draws the player, and calls bullets, structures and health draw methods"""
+        """draws the player, and calls arrows, structures and health draw methods"""
         window.blit(self.player_img, (self.x,self.y))
         self.healthbar(window)
-        self.move_bullets()
-        for bullet in self.bullets:
-            bullet.draw(window)
+        self.move_arrows()
+        for arrow in self.arrows:
+            arrow.draw(window)
         for cover in self.cover_built:
             cover.draw()
 
     def shoot(self, inverse = False):
-        """shoots a bullet"""
+        """shoots a arrow"""
         if self.mag >= 0 and self.fire_rate == 0:
             if inverse:
-                bullet = Bullet(self.x + YELLOW_PLAYER_IMG.get_width(), self.y + YELLOW_PLAYER_IMG.get_height()/2, pygame.transform.rotate(BULLET, 180), self.color)
+                arrow = Arrow(self.x + GREEN_PLAYER_IMG.get_width(), self.y + GREEN_PLAYER_IMG.get_height()/2, pygame.transform.rotate(ARROW1, 180), self.color)
             else:
-                bullet = Bullet(self.x, self.y + BLUE_PLAYER_IMG.get_height()/2, BULLET, self.color)
-            self.bullets.append(bullet)
+                arrow = Arrow(self.x, self.y + RED_PLAYER_IMG.get_height()/2, ARROW1, self.color)
+            self.arrows.append(arrow)
             print(self.mag)
             self.mag -= 1
             self.fire_rate = 1
@@ -207,13 +207,13 @@ class Player:
         elif self.fire_rate > 0:
             self.fire_rate += 1
 
-    def move_bullets(self, vel = 7):
-        """moves a players bullets, until it is off screen then it deletes"""
+    def move_arrows(self, vel = 3):
+        """moves a players arrows, until it is off screen then it deletes"""
         self.cool_down()
-        for bullet in self.bullets:
-            bullet.move_b(vel)
-            if bullet.off_screen():
-                self.bullets.remove(bullet)
+        for arrow in self.arrows:
+            arrow.move_b(vel)
+            if arrow.off_screen():
+                self.arrows.remove(arrow)
 
     def move(self, direction, player_vel):
         """controls a players movement"""
@@ -235,9 +235,9 @@ class Player:
         if self.fire_rate == 0:
             if len(self.cover_built) < 3 :
                 if inverse:
-                    cover = Structure(self.x - BLUE_PLAYER_IMG.get_width(), self.y + 10,pygame.transform.rotate(SAND_BAGS, 180))
+                    cover = Structure(self.x - RED_PLAYER_IMG.get_width() - 10, self.y + 10,BOLDER)
                 else:
-                    cover = Structure(self.x + YELLOW_PLAYER_IMG.get_width(), self.y, SAND_BAGS)
+                    cover = Structure(self.x + GREEN_PLAYER_IMG.get_width(), self.y, BOLDER)
                 self.cover_built.append(cover)
                 for cover in self.cover_built:
                     cover.draw()
@@ -254,8 +254,7 @@ def fired_round(obj, round):
     overlap_y = obj.y -round.y
     return round.mask.overlap(obj.mask, (overlap_x,overlap_y)) != None
 
-# class for bullet
-class Bullet:
+class Arrow:
     def __init__(self, x, y, img, color):
         self.x = x
         self.y = y
@@ -264,19 +263,19 @@ class Bullet:
         self.mask = pygame.mask.from_surface(self.img) 
         
     def draw(self, window ):
-        """draws the bullets"""
+        """draws the arrows"""
         window.blit(self.img, (self.x, self.y))
-        self.move_b(vel = 7)
+        self.move_b(vel = 3)
         
     def move_b(self, vel):
-        """moves the bullet based on player color"""
-        if self.color == 'yellow':
+        """moves the arrow based on player color"""
+        if self.color == 'green':
             self.x += vel
-        elif self.color == 'blue':
+        elif self.color == 'red':
             self.x -= vel
 
     def off_screen(self):
-        """checks to see if a bullet leavs the screen"""
+        """checks to see if a arrow leavs the screen"""
         return not(self.x < WIDTH and self.x >0)
 
 class Structure:
@@ -295,6 +294,8 @@ class Structure:
     def hit(self, round):
         """checks to see in a structure was hit"""
         return fired_round(self,round)
+############################ End of battlemap section ##########################
+
 
 def draw_main_menu(input = 1):
     """draws the main menu and runs the commands"""
@@ -337,8 +338,8 @@ def draw_gameboard():
 
 def draw_battlemap(input):
     """starts the battlemap commands"""
-    yellow_player = Player(50, HEIGHT - (YELLOW_PLAYER_IMG.get_height() + 50) ,YELLOW_PLAYER_IMG , 'yellow')
-    blue_player = Player(WIDTH - (BLUE_PLAYER_IMG.get_width()+50),100,BLUE_PLAYER_IMG, 'blue')
+    green_player = Player(50, HEIGHT - (GREEN_PLAYER_IMG.get_height() + 50) ,GREEN_PLAYER_IMG , 'green')
+    red_player = Player(WIDTH - (RED_PLAYER_IMG.get_width()+50),100,RED_PLAYER_IMG, 'red')
     player_vel = 6
     winner_text = ''
     run = True
@@ -356,79 +357,79 @@ def draw_battlemap(input):
             if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
                 run = False
         # handles the player movement and limits the players movement to their perspective boxes
-        if keys[pygame.K_a] and yellow_player.x + player_vel > 0:
-            yellow_player.move('left', player_vel)
-        if keys[pygame.K_d] and yellow_player.x + player_vel + PLAYER_W < WIDTH / 2 - BARB_WIRE.get_width() / 2:
-            yellow_player.move('right', player_vel)
-        if keys[pygame.K_w] and yellow_player.y > 20:
-            yellow_player.move('up', player_vel)
-        if keys[pygame.K_s] and yellow_player.y + player_vel + PLAYER_H < HEIGHT :
-            yellow_player.move('down', player_vel)
-        if keys[pygame.K_LEFT] and blue_player.x + player_vel + PLAYER_W > WIDTH / 2 + BARB_WIRE.get_width() + PLAYER_W:
-            blue_player.move('left', player_vel)
-        if keys[pygame.K_RIGHT] and blue_player.x + player_vel < WIDTH - PLAYER_W:
-            blue_player.move('right', player_vel)
-        if keys[pygame.K_UP] and blue_player.y > 20:
-            blue_player.move('up', player_vel)
-        if keys[pygame.K_DOWN]and blue_player.y + player_vel + PLAYER_H < HEIGHT:
-            blue_player.move('down', player_vel)
+        if keys[pygame.K_a] and green_player.x + player_vel > 0:
+            green_player.move('left', player_vel)
+        if keys[pygame.K_d] and green_player.x + player_vel + PLAYER_W < WIDTH / 2 - RIVER.get_width() / 2:
+            green_player.move('right', player_vel)
+        if keys[pygame.K_w] and green_player.y > 20:
+            green_player.move('up', player_vel)
+        if keys[pygame.K_s] and green_player.y + player_vel + PLAYER_H < HEIGHT :
+            green_player.move('down', player_vel)
+        if keys[pygame.K_LEFT] and red_player.x + player_vel + PLAYER_W > WIDTH / 2 + RIVER.get_width() + PLAYER_W:
+            red_player.move('left', player_vel)
+        if keys[pygame.K_RIGHT] and red_player.x + player_vel < WIDTH - PLAYER_W:
+            red_player.move('right', player_vel)
+        if keys[pygame.K_UP] and red_player.y > 20:
+            red_player.move('up', player_vel)
+        if keys[pygame.K_DOWN]and red_player.y + player_vel + PLAYER_H < HEIGHT:
+            red_player.move('down', player_vel)
         if keys[pygame.K_v]:
-            yellow_player.build()
+            green_player.build()
         if keys[pygame.K_n]:
-            blue_player.build(True)
+            red_player.build(True)
         if keys[pygame.K_c]:
-            yellow_player.shoot(True)
+            green_player.shoot()
         if keys[pygame.K_m]:
-            blue_player.shoot()
+            red_player.shoot(True)
         
-        # checks to see if a bullet hits a player or structure
-        for bullet in yellow_player.bullets:
-            if blue_player.hit(bullet):
-                blue_player.health -= 10 
-                yellow_player.bullets.remove(bullet)
-            for build in blue_player.cover_built:
-                if build.hit(bullet) and build.health > 0:
+        # checks to see if a arrow hits a player or structure
+        for arrow in green_player.arrows:
+            if red_player.hit(arrow):
+                red_player.health -= 10 
+                green_player.arrows.remove(arrow)
+            for build in red_player.cover_built:
+                if build.hit(arrow) and build.health > 0:
                     build.health -= 10 
-                    yellow_player.bullets.remove(bullet)
+                    green_player.arrows.remove(arrow)
                 elif build.health <= 0:
-                    blue_player.cover_built.remove(build)
-        for bullet in blue_player.bullets:
-            if yellow_player.hit(bullet):
-                yellow_player.health -= 10 
-                blue_player.bullets.remove(bullet)
-            for build in yellow_player.cover_built:
-                if build.hit(bullet) and build.health > 0:
+                    red_player.cover_built.remove(build)
+        for arrow in red_player.arrows:
+            if green_player.hit(arrow):
+                green_player.health -= 10 
+                red_player.arrows.remove(arrow)
+            for build in green_player.cover_built:
+                if build.hit(arrow) and build.health > 0:
                     build.health -= 10 
-                    blue_player.bullets.remove(bullet)
+                    red_player.arrows.remove(arrow)
                 elif build.health <= 0:
-                    yellow_player.cover_built.remove(build)
+                    green_player.cover_built.remove(build)
 
         # draws the barbed wire/ sandbags/ ammo_count
-        WIN.blit(BARB_WIRE, (WIDTH/2 - BARB_WIRE.get_width()/2, 10))
+        WIN.blit(RIVER, (WIDTH/2 - RIVER.get_width()/2, 10))
         for key in input:
-            # draws yellows info
-            if key == 'yellow':
-                yellow_ammo_count = ammo_count_font.render(str(yellow_player.mag),1, color_dict['yellow'])
-                WIN.blit(yellow_ammo_count, (WIDTH - WIDTH/2 - yellow_ammo_count.get_width() - 50,10))
-                for i in range(0, 3-len(yellow_player.cover_built)):
-                    WIN.blit(SAND_BAGS,(SAND_BAGS.get_width() * i, 10))
+            # draws greens info
+            if key == 'green':
+                green_ammo_count = ammo_count_font.render(str(green_player.mag),1, color_dict['green'])
+                WIN.blit(green_ammo_count, (WIDTH - WIDTH/2 - green_ammo_count.get_width() - 50,10))
+                for i in range(0, 3-len(green_player.cover_built)):
+                    WIN.blit(BOLDER,(BOLDER.get_width() * i, 10))
 
-            # draws blues info
-            if key == 'blue':
-                blue_ammo_count = ammo_count_font.render(str(blue_player.mag),1,color_dict['blue'])
-                WIN.blit(blue_ammo_count, (WIDTH/2 + blue_ammo_count.get_width(), 10))
-                for i in range(0, 3-len(blue_player.cover_built)):
-                    WIN.blit(SAND_BAGS,(WIDTH - (SAND_BAGS.get_width() * (i+1)), 10))
+            # draws reds info
+            if key == 'red':
+                red_ammo_count = ammo_count_font.render(str(red_player.mag),1,color_dict['red'])
+                WIN.blit(red_ammo_count, (WIDTH/2 + red_ammo_count.get_width(), 10))
+                for i in range(0, 3-len(red_player.cover_built)):
+                    WIN.blit(BOLDER,(WIDTH - (BOLDER.get_width() * (i+1)), 10))
 
         # draws the players on the screen
-        yellow_player.draw(WIN)
-        blue_player.draw(WIN)
+        green_player.draw(WIN)
+        red_player.draw(WIN)
 
         # update winner
-        if yellow_player.health == 0:
-            winner_text = 'Blue player wins!!'
-        if blue_player.health == 0:
-            winner_text = 'Yellow player wins!!'
+        if green_player.health == 0:
+            winner_text = 'red player wins!!'
+        if red_player.health == 0:
+            winner_text = 'Green player wins!!'
         if winner_text != '':
             draw_winner(winner_text)
 
@@ -453,6 +454,7 @@ def main():
                 draw_main_menu(2)
             if keys[pygame.K_SPACE]:
                 draw_gameboard()
+        draw_main_menu()
 
         pygame.display.update()
 
