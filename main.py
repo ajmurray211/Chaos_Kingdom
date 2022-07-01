@@ -308,6 +308,8 @@ def draw_main_menu(input = 1):
 
 def draw_gameboard():
     """"starts the gamboard commands"""
+    red = 0
+    green = 0
     run=True
     while run:
         WIN.blit(GAME_BOARD_BG, (0,0))
@@ -326,6 +328,11 @@ def draw_gameboard():
                 run = False
             if keys[pygame.K_6]:
                 draw_battlemap(text_dict['3'])
+
+            green_cities = main_font.render(str(green),1, color_dict['black'])
+            WIN.blit(green_cities, (900, HEIGHT - main_font.get_height()- 20))
+            red_cities = main_font.render(str(red),1, color_dict['black'])
+            WIN.blit(red_cities, (100, HEIGHT - main_font.get_height() - 20))
             pygame.display.update()
 
 def draw_battlemap(input):
