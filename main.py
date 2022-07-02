@@ -15,6 +15,7 @@ winner_font = pygame.font.Font('assets/IMMORTAL.ttf', 100)
 
 # set FPS and Vel for arrows and player movement
 FPS = 60
+
 # set W adn H for player size
 PLAYER_W, PLAYER_H = 70, 70
 ARROW_W, ARROW_H = 40, 10
@@ -25,11 +26,13 @@ NEUTRAL_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', '
 RED_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_player.png')), (PLAYER_W, PLAYER_H))
 UNIT1_IMG = pygame.transform.flip(pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit1.png')), (PLAYER_W*2, PLAYER_H*2)), True,False )
 UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_flag.png')), (50, 40))
+ACTIVE_UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'active_red.png')), (50, 40))
 
 # player 2 - green
 GREEN_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_player.png')), (PLAYER_W, PLAYER_H))
 UNIT2_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit2.png')), (PLAYER_W *2, PLAYER_H*2))
 UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_flag.png')), (50, 40))
+ACTIVE_UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'active_green.png')), (50, 40))
 
 # arrows and barriers
 ARROW1 = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'arrow1.png')), (ARROW_W, ARROW_H))
@@ -74,85 +77,200 @@ city_dict = {
         'owner': 'red',
         'x_cord': 836,
         'y_cord': 220,
-        'city_num': 1
-    },
+        'city_num': 1,
+        'active': True ,
+        'linked_cities': ['Yido', 'Ipria']   
+        },
     "Gishire": {
         'owner': 'green',
         'x_cord': 95,
         'y_cord': 300,
-        'city_num': 2
-    },
+        'city_num': 2,
+        'active': True ,
+        'linked_cities': ['Tetgas','Sheaford']   
+        },
     "Tetgas": {
         'owner': 'None',
         'x_cord': 320,
         'y_cord': 212,
-        'city_num': 3
-    },
+        'city_num': 3,
+        'active': False,
+        'linked_cities': ['Gishire','Plecdiff','Oreledo']    
+        },
     "Oreledo": {
         'owner': 'None',
         'x_cord': 395,
         'y_cord': 300,
-        'city_num': 4
-    },
+        'city_num': 4,
+        'active': False,
+        'linked_cities': ['Tetgas','Strinta', 'Inphis']    
+        },
     "Plecdiff": {
         'owner': 'None',
         'x_cord': 460,
         'y_cord': 185,
-        'city_num': 5
-    },
+        'city_num': 5,
+        'active': False,
+        'linked_cities': ['Tetgas','Strinta']    
+        },
     "Strinta": {
         'owner': 'None',
         'x_cord': 518,
         'y_cord': 242,
-        'city_num': 6
-    },
+        'city_num': 6,
+        'active': False,
+        'linked_cities': ['Plecdiff', 'Oreledo', 'Yido','Ipria']    
+        },
     "Yido": {
         'owner': 'None',
         'x_cord': 830,
         'y_cord': 100,
-        'city_num': 7
-    },
+        'city_num': 7,
+        'active': False,
+        'linked_cities': ['Strinta','Utrila']    
+        },
     "Ipria": {
         'owner': 'None',
         'x_cord': 627,
         'y_cord': 343,
-        'city_num': 8
-    },
+        'city_num': 8,
+        'active': False,
+        'linked_cities': ['Strinta','Zhento', 'Zhento']    
+        },
     "Zhento": {
         'owner': 'None',
         'x_cord': 765,
         'y_cord': 450,
-        'city_num': 9
-    },
+        'city_num': 9,
+        'active': False,
+        'linked_cities': ['Ipria', 'Uleron']    
+        },
     "Uleron": {
         'owner': 'None',
         'x_cord': 374,
         'y_cord': 478,
-        'city_num': 10
+        'city_num': 10,
+        'active': False,
+        'linked_cities': ['Zhento','Inphis']
     },
     "Inphis": {
         'owner': 'None',
         'x_cord': 334,
         'y_cord': 347,
-        'city_num': 11
+        'city_num': 11,
+        'active': False,
+        'linked_cities': ['Oreledo','Uleron', 'Glavine']
     },
     "Glavine": {
         'owner': 'None',
         'x_cord': 295,
         'y_cord': 317,
-        'city_num': 12
+        'city_num': 12,
+        'active': False,
+        'linked_cities': ['Inphis','Sheaford']
     },
     "Sheaford": {
         'owner': 'None',
         'x_cord': 205,
         'y_cord': 400,
-        'city_num': 13
+        'city_num': 13,
+        'active': False,
+        'linked_cities': ['Gishire','Galvine']
     }
 }
+###################### end of Game settings and imports section ##############
 
-###################### end of Game settings and imports section ###############################
+###################### Gameboard gameplay ####################################
+
+# class for active marker?
+    # color
+    # city location
+    # linked cities 
+
+    # move the active token
+        # is the city is located in linked cities of the current city location 
 
 
+# class for Cities 
+    # name
+    # owner
+    # active
+    # city connections
+    # coordinates
+
+    # handle when a player attacks (self, who is attacking)
+        # if the city has an owner not equal to teh current owner
+            # launch a battlemap
+                # set current owner to winner 
+                    # change owner method
+                # if they won do nothing 
+        # if the city doesnt have an owner
+            # change the owner function
+            # change active status
+
+    # change owner (self, who is attacking )
+        # if the city owner is none
+            # set self.owner to attacker color 
+        # if the owner color is red
+            # change the owner color to green
+        # if the owner color is equal to green
+            # change the owner color to red
+
+    # change active status (self)
+        # set self.status to opposite
+        # if self.active equals True
+            # set active to false
+        # if status equals false
+            # set status to true  
+
+def draw_gameboard():
+    """"starts the gamboard commands"""
+    run=True
+    clock = pygame.time.Clock()
+   
+    while run:
+        red_owned = []
+        green_owned = []
+        clock.tick(FPS)
+        WIN.blit(GAME_BOARD_BG, (0,0))
+        # assigns name and flags to cities
+        for name in city_dict:
+            if city_dict[name]['owner'] == 'red' and name not in red_owned:
+                red_owned.append(name)
+            elif city_dict[name]['owner'] == 'green' and name not in green_owned:
+                green_owned.append(name)
+
+            city_name = city_font.render(name,1,color_dict['white'])
+            if city_dict[name]['owner'] == 'red':
+                if city_dict[name]['active'] == True:
+                    WIN.blit(ACTIVE_UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                elif city_dict[name]['active'] == False:
+                    WIN.blit(UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
+            elif city_dict[name]['owner'] == 'green':
+                if city_dict[name]['active'] == True:
+                    WIN.blit(ACTIVE_UNIT2_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                elif city_dict[name]['active'] == False:
+                    WIN.blit(UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
+            else:
+                WIN.blit(NEUTRAL_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                WIN.blit(city_name, (city_dict[name]['x_cord'], city_dict[name]['y_cord'] - city_name.get_height() + 10))
+
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                run = False
+            if keys[pygame.K_6]:
+                draw_battlemap(text_dict['3'])
+
+            green_cities = ammo_count_font.render(str(len(green_owned)),1, color_dict['black'])
+            WIN.blit(green_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
+            red_cities = ammo_count_font.render(str(len(red_owned)),1, color_dict['black'])
+            WIN.blit(red_cities, (100, HEIGHT - ammo_count_font.get_height() - 10))
+            pygame.display.update()
+
+############################ end of gameboard gameplay #######################
 
 ########################### Battlemap gameplay ################################
 class Player:
@@ -295,57 +413,6 @@ class Structure:
     def hit(self, round):
         """checks to see in a structure was hit"""
         return fired_round(self,round)
-############################ End of battlemap section ##########################
-
-
-def draw_main_menu(input = 1):
-    """draws the main menu and runs the commands"""
-    WIN.blit(MAIN_MENU_BG, (0,0))
-    title = main_font.render(text_dict[str(input)]['title'], 1, color_dict['white'])
-    prompt = main_font.render(text_dict[str(input)]['prompt'], 1, color_dict['white'])
-    WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
-    WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
-
-def draw_gameboard():
-    """"starts the gamboard commands"""
-    run=True
-    clock = pygame.time.Clock()
-    city_list = list(city_dict.keys())
-    while run:
-        red_owned = []
-        green_owned = []
-        clock.tick(FPS)
-        WIN.blit(GAME_BOARD_BG, (0,0))
-        # assigns name and flags to cities
-        for name in city_dict:
-            if city_dict[name]['owner'] == 'red' and name not in red_owned:
-                red_owned.append(name)
-            elif city_dict[name]['owner'] == 'green' and name not in green_owned:
-                green_owned.append(name)
-                      
-            city_name = city_font.render(name,1,color_dict['white'])
-            if city_dict[name]['owner'] == 'red':
-                WIN.blit(UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
-                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
-            elif city_dict[name]['owner'] == 'green':
-                WIN.blit(UNIT2_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
-                WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
-            else:
-                WIN.blit(NEUTRAL_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
-                WIN.blit(city_name, (city_dict[name]['x_cord'], city_dict[name]['y_cord'] - city_name.get_height() + 10))
-
-        keys = pygame.key.get_pressed()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
-                run = False
-            if keys[pygame.K_6]:
-                draw_battlemap(text_dict['3'])
-
-            green_cities = ammo_count_font.render(str(len(green_owned)),1, color_dict['black'])
-            WIN.blit(green_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
-            red_cities = ammo_count_font.render(str(len(red_owned)),1, color_dict['black'])
-            WIN.blit(red_cities, (100, HEIGHT - ammo_count_font.get_height() - 10))
-            pygame.display.update()
 
 def draw_battlemap(input):
     """starts the battlemap commands"""
@@ -356,7 +423,6 @@ def draw_battlemap(input):
     run = True
     pygame.display.update()
 
-
     while winner_text == '' and run:
         WIN.blit(BATTLEMAP_BG,(0,0))
         def draw_winner(text):
@@ -365,10 +431,12 @@ def draw_battlemap(input):
             WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
             pygame.display.update()
             pygame.time.delay(5000)
+
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
                 run = False
+
         # handles the player movement and limits the players movement to their perspective boxes
         if keys[pygame.K_a] and green_player.x + player_vel > 0:
             green_player.move('left', player_vel)
@@ -447,8 +515,16 @@ def draw_battlemap(input):
             draw_winner(winner_text)
 
         pygame.display.update()
+############################ End of battlemap section ########################
 
-### This is the process for filtering multiple screens ###
+def draw_main_menu(input = 1):
+    """draws the main menu and runs the commands"""
+    WIN.blit(MAIN_MENU_BG, (0,0))
+    title = main_font.render(text_dict[str(input)]['title'], 1, color_dict['white'])
+    prompt = main_font.render(text_dict[str(input)]['prompt'], 1, color_dict['white'])
+    WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
+    WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
+
 def main():
     """This is the main menu handling initial game events"""
     clock = pygame.time.Clock()
