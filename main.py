@@ -179,7 +179,7 @@ city_dict = {
     }
 }
 ###################### end of Game settings and imports section ##############
-
+ 
 ###################### Gameboard gameplay ####################################
 
 # class for active marker?
@@ -189,7 +189,6 @@ city_dict = {
 
     # move the active token
         # is the city is located in linked cities of the current city location 
-
 
 # class for Cities 
     # name
