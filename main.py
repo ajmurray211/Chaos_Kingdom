@@ -1,5 +1,5 @@
-from re import T
-import pygame, os, random, time
+
+import pygame, os, random, time, sys
 pygame.font.init()
 
 ###################### Game settings and imports section ###############################
@@ -74,40 +74,34 @@ text_dict = {
     }
 }
 city_dict = {
-    "Utrila": {
-        'owner': 'red',
-        'x_cord': 836,
+    "Utrila": {        'x_cord': 836,
         'y_cord': 220,
         'city_num': 1,
         'active': True ,
         'linked_cities': ['Yido', 'Ipria']   
         },
     "Gishire": {
-        'owner': 'green',
         'x_cord': 95,
         'y_cord': 300,
         'city_num': 2,
         'active': True ,
         'linked_cities': ['Tetgas','Sheaford']   
         },
-    "Tetgas": {
-        'owner': 'None',
+    "Tetgas": {        
         'x_cord': 320,
         'y_cord': 212,
         'city_num': 3,
         'active': False,
-        'linked_cities': ['Gishire','Plecdiff','Oreledo']    
+        'linked_cities': ['Gishire','Oreledo','Plecdiff']    
         },
     "Oreledo": {
-        'owner': 'None',
         'x_cord': 395,
         'y_cord': 300,
         'city_num': 4,
         'active': False,
-        'linked_cities': ['Tetgas','Strinta', 'Inphis']    
+        'linked_cities': ['Tetgas','Inphis', 'Strinta']    
         },
     "Plecdiff": {
-        'owner': 'None',
         'x_cord': 460,
         'y_cord': 185,
         'city_num': 5,
@@ -115,15 +109,13 @@ city_dict = {
         'linked_cities': ['Tetgas','Strinta']    
         },
     "Strinta": {
-        'owner': 'None',
         'x_cord': 518,
         'y_cord': 242,
         'city_num': 6,
         'active': False,
-        'linked_cities': ['Plecdiff', 'Oreledo', 'Yido','Ipria']    
+        'linked_cities': ['Plecdiff', 'Ipria', 'Oreledo','Yido']    
         },
     "Yido": {
-        'owner': 'None',
         'x_cord': 830,
         'y_cord': 100,
         'city_num': 7,
@@ -131,15 +123,13 @@ city_dict = {
         'linked_cities': ['Strinta','Utrila']    
         },
     "Ipria": {
-        'owner': 'None',
         'x_cord': 627,
         'y_cord': 343,
         'city_num': 8,
         'active': False,
-        'linked_cities': ['Strinta','Zhento', 'Zhento']    
+        'linked_cities': ['Utrila','Strinta', 'Zhento']    
         },
     "Zhento": {
-        'owner': 'None',
         'x_cord': 765,
         'y_cord': 450,
         'city_num': 9,
@@ -147,15 +137,13 @@ city_dict = {
         'linked_cities': ['Ipria', 'Uleron']
         },
     "Uleron": {
-        'owner': 'None',
         'x_cord': 374,
         'y_cord': 478,
         'city_num': 10,
         'active': False,
-        'linked_cities': ['Zhento','Inphis']
+        'linked_cities': ['Inphis','Zhento']
     },
     "Inphis": {
-        'owner': 'None',
         'x_cord': 334,
         'y_cord': 347,
         'city_num': 11,
@@ -163,7 +151,6 @@ city_dict = {
         'linked_cities': ['Oreledo','Uleron', 'Glavine']
     },
     "Glavine": {
-        'owner': 'None',
         'x_cord': 295,
         'y_cord': 317,
         'city_num': 12,
@@ -171,12 +158,11 @@ city_dict = {
         'linked_cities': ['Inphis','Sheaford']
     },
     "Sheaford": {
-        'owner': 'None',
         'x_cord': 205,
         'y_cord': 400,
         'city_num': 13,
         'active': False,
-        'linked_cities': ['Gishire','Galvine']
+        'linked_cities': ['Gishire','Glavine']
     }
 }
 ###################### end of Game settings and imports section ##############
@@ -184,103 +170,128 @@ city_dict = {
 ###################### Gameboard gameplay ####################################
 def draw_gameboard():
     """"starts the gamboard commands"""
+    # variables
     run=True
     clock = pygame.time.Clock()
+    red_active_token = []
+    green_active_token = []
+    red_owned_cities = []
+    green_owned_cities = []
+    neutral_cities = []
+    turn_index = 1
+
+    # capitals
+    red_owned_cities.append('Utrila')
+    green_owned_cities.append('Gishire')
+
+    print(red_active_token, green_active_token)
+
     def change_owner(city, attacker):
         """changes the owner of a city based on an attack"""
         if city in neutral_cities:
-            if attacker == 'red':
+            if attacker == 'red' and city not in red_owned_cities:
                 red_owned_cities.append(city)
-            if attacker =='green':
+            if attacker =='green' and city not in green_owned_cities:
                 green_owned_cities.append(city)
-        elif city in red_owned_cities:
-            if attacker == 'red':
-                red_owned_cities.remove(city)
-                green_owned_cities.append(city)
-            if attacker =='green':
-                green_owned_cities.remove(city)
-                red_owned_cities.append(city)
-        elif city in green_owned_cities:
-            if attacker == 'red':
-                red_owned_cities.remove(city)
-                green_owned_cities.append(city)
-            if attacker =='green':
+        elif city in red_owned_cities and attacker == 'green':
+            red_owned_cities.remove(city)
+            green_owned_cities.append(city)
+        elif city in green_owned_cities and attacker == 'red':
                 green_owned_cities.remove(city)
                 red_owned_cities.append(city)
         
-    def active_token_change(who, city):
+    def active_token_change(who, city, index):
         """Changes the active token for the each player"""
         if who == 'red':
-            red_active_token.append(city)
             red_active_token.pop(0)
-        if who == 'green':
-            red_active_token.append(city)
-            red_active_token.pop(0)
+            red_active_token.append(city_dict[city]['linked_cities'][index])
+            change_owner(city_dict[city]['linked_cities'][index], who)
+        elif who == 'green':
+            green_active_token.pop(0)
+            green_active_token.append(city_dict[city]['linked_cities'][index])
+            change_owner(city_dict[city]['linked_cities'][index], who)
 
     def check_owner(who,city):
         """checks the current owner of the city, and launches battle map if necessary"""
         if who == 'red' and city in green_owned_cities:
             draw_battlemap()
-        elif who == 'green' and city in red_owned_cities:
+        if who == 'green' and city in red_owned_cities:
             draw_battlemap()
 
     def winner(who):
         """declares the game winner and brings you to main menu"""
-        winner_msg = winner_font.render(f"Congragulations {who} you have won!!")
-        WIN.blit(winner_msg, (WIDTH/2 - winner_msg.get_width() / 2, HEIGHT /2 - winner_msg.get_height() /2 ))
+        winner_msg = winner_font.render(f"{who} you have won!!",1, color_dict['black'])
+        WIN.blit(winner_msg, (30, HEIGHT /2 - winner_font.get_height() /2 ))
         pygame.display.update()
         pygame.time.delay(5000)
-        run = False
+        draw_main_menu()
 
+    def print_moves(who, city, city2):
+        movement_text = city_font.render(f'{who} press up to move to {city} or down to move to {city2}',1,color_dict['black']) 
+        WIN.blit(movement_text, (WIDTH /2 - 250, HEIGHT - 40))
+    
+    def move(who, city):
+        """checks to see where you can move and allows movement, returns boolean if movement is allowed"""  
+        if len(city_dict[city]['linked_cities']) == 2:
+            print_moves(who, city_dict[city]['linked_cities'][0], city_dict[city]['linked_cities'][1])
+            if keys[pygame.K_UP]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                print(check_owner(who, city_dict[city]['linked_cities'][0]))
+                active_token_change(who,city,0)
+                return True
+            if keys[pygame.K_DOWN]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                active_token_change(who, city , 1)
+                return True
+        elif len(city_dict[city]['linked_cities']) == 3: 
+            print_moves( who, city_dict[city]['linked_cities'][0],city_dict[city]['linked_cities'][1]) 
+            if keys[pygame.K_UP]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                active_token_change(who,city, 0)
+                return True
+            if keys[pygame.K_DOWN]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                active_token_change(who,city, 1)
+                return True
+            if keys[pygame.K_RIGHT]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][2]))
+                active_token_change(who,city, 2) 
+                return True
+        elif len(city_dict[city]['linked_cities']) == 4: 
+            print_moves(who, city_dict[city]['linked_cities'][0],city_dict[city]['linked_cities'][1])
+            if keys[pygame.K_UP]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                active_token_change(who,city, 0)
+                return True
+            if keys[pygame.K_DOWN]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                active_token_change(who,city, 1)
+                return True
+            if keys[pygame.K_RIGHT]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][2]))
+                active_token_change(who,city, 2)
+                return True
+            if keys[pygame.K_LEFT]:
+                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][3]))
+                active_token_change(who,city, 3)
+                return True
+   
     while run:
+        print(red_active_token, green_active_token)
         keys = pygame.key.get_pressed()
-        red_active_token = []
-        green_active_token = []
-        red_owned_cities = []
-        green_owned_cities = []
-        neutral_cities = []
+        event = pygame.event.wait()
         clock.tick(FPS)
         WIN.blit(GAME_BOARD_BG, (0,0))
-        def move(who, city):
-            print(city_dict[city]['linked_cities'])
-            """checks to see where you can move and allows movement, returns boolean if movement is allowed"""
-            if len(city_dict[city]['linked_cities']) == 2:
-                if keys[pygame.K_UP]:
-                    # check the owner at the linked city index 0
-                    # check_owner(who, city[0])
-                    active_token_change(who,city[0])
-                if keys[pygame.K_DOWN]:
-                    active_token_change(who,city[1])
-            if len(city_dict[city]['linked_cities']) == 3:
-                if keys[pygame.K_UP]:
-                    active_token_change(who,city[0])
-                if keys[pygame.K_DOWN]:
-                    active_token_change(who,city[1])
-                if keys[pygame.K_RIGHT]:
-                    active_token_change(who,city[2])
-            if len(city_dict[city]['linked_cities']) == 4:
-                if keys[pygame.K_UP]:
-                    active_token_change(who,city[0])
-                if keys[pygame.K_DOWN]:
-                    active_token_change(who,city[1])
-                if keys[pygame.K_RIGHT]:
-                    active_token_change(who,city[2])
-                if keys[pygame.K_LEFT]:
-                    active_token_change(who,city[3])
 
         # assigns initial active token
         if len(red_active_token) == 0:
-            red_active_token.append('Utrila')
+            red_active_token.append(red_owned_cities[0])
         if len(green_active_token) == 0:
-            green_active_token.append('Gishire')
+            green_active_token.append(green_owned_cities[0])
 
         # assigns name and flags to cities
         for name in city_dict:
-            if city_dict[name]['owner'] == 'red' and name not in red_owned_cities:
-                red_owned_cities.append(name)
-            elif city_dict[name]['owner'] == 'green' and name not in green_owned_cities:
-                green_owned_cities.append(name)
-            else:
+            if name not in red_owned_cities or name not in green_owned_cities:
                 neutral_cities.append(name)
 
             # assigns flags to the correct color and location
@@ -295,26 +306,27 @@ def draw_gameboard():
                 if name in green_active_token:
                     WIN.blit(ACTIVE_UNIT2_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
                 else:
-                    WIN.blit(UNIT1_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
+                    WIN.blit(UNIT2_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
                 WIN.blit(city_name, (city_dict[name]['x_cord'],city_dict[name]['y_cord'] - (UNIT2_FLAG.get_height() - 20)))
             else:
                 WIN.blit(NEUTRAL_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
                 WIN.blit(city_name, (city_dict[name]['x_cord'], city_dict[name]['y_cord'] - city_name.get_height() + 10))
+        pygame.display.update()
 
-        if len(red_owned_cities) == 13:
-            winner('red')
-        if len(green_owned_cities) == 13:
-            winner('green')
+        # declares winner
+        if len(red_owned_cities) == 13 or 'Gishire' in red_owned_cities:
+            winner('Red')
+        if len(green_owned_cities) == 13 or 'Utrila' in green_owned_cities:
+            winner('Green')
 
         # executes the turn based portion of the game 
-        turn_index = 1
-        if turn_index == 1:
-            move('green', green_active_token[0])
-            turn_index += 1
-        if turn_index == 2:
-            move('red', red_active_token[0])
-            turn_index -= 1
-
+        if turn_index  == 1:
+           if move('green', green_active_token[0]):
+               turn_index += 1
+        elif turn_index == 2:
+            if move('red', red_active_token[0]):
+                turn_index -= 1
+            
         # dev controls to progress or quit to be deleted later 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
@@ -324,9 +336,9 @@ def draw_gameboard():
 
         # renders the city count and updates the screen
         green_cities = ammo_count_font.render(str(len(green_owned_cities)),1, color_dict['black'])
-        WIN.blit(green_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
+        WIN.blit(green_cities, (100, HEIGHT - ammo_count_font.get_height() - 10))
         red_cities = ammo_count_font.render(str(len(red_owned_cities)),1, color_dict['black'])
-        WIN.blit(red_cities, (100, HEIGHT - ammo_count_font.get_height() - 10))
+        WIN.blit(red_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
         pygame.display.update()
 
 ############################ end of gameboard gameplay #######################
@@ -473,7 +485,7 @@ class Structure:
         """checks to see in a structure was hit"""
         return fired_round(self,round)
 
-def draw_battlemap(input):
+def draw_battlemap():
     """starts the battlemap commands"""
     green_player = Player(50, HEIGHT - (GREEN_PLAYER_IMG.get_height() + 50) ,GREEN_PLAYER_IMG , 'green')
     red_player = Player(WIDTH - (RED_PLAYER_IMG.get_width()+50),100,RED_PLAYER_IMG, 'red')
@@ -486,7 +498,7 @@ def draw_battlemap(input):
         WIN.blit(BATTLEMAP_BG,(0,0))
         def draw_winner(text):
             """handles player winning"""
-            draw_text = winner_font.render(text, 1, color_dict['white'])
+            draw_text = winner_font.render(f"{text} player wins!!", 1, color_dict['white'])
             WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
             pygame.display.update()
             pygame.time.delay(5000)
@@ -546,7 +558,7 @@ def draw_battlemap(input):
 
         # draws the barbed wire/ sandbags/ ammo_count
         WIN.blit(RIVER, (WIDTH/2 - RIVER.get_width()/2, 10))
-        for key in input:
+        for key in text_dict['3']:
             # draws greens info
             if key == 'green':
                 green_ammo_count = ammo_count_font.render(str(green_player.mag),1, color_dict['green'])
@@ -567,20 +579,20 @@ def draw_battlemap(input):
 
         # update winner
         if green_player.health == 0:
-            winner_text = 'red player wins!!'
+            winner_text = 'Red'
         if red_player.health == 0:
-            winner_text = 'Green player wins!!'
+            winner_text = 'Green'
         if winner_text != '':
             draw_winner(winner_text)
-
         pygame.display.update()
+    return(winner_text)
 ############################ End of battlemap section ########################
 
-def draw_main_menu(input = 1):
+def draw_main_menu():
     """draws the main menu and runs the commands"""
     WIN.blit(MAIN_MENU_BG, (0,0))
-    title = main_font.render(text_dict[str(input)]['title'], 1, color_dict['white'])
-    prompt = main_font.render(text_dict[str(input)]['prompt'], 1, color_dict['white'])
+    title = winner_font.render(text_dict['1']['title'], 1, color_dict['black'])
+    prompt = main_font.render(text_dict['1']['prompt'], 1, color_dict['black'])
     WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
     WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
 
@@ -599,7 +611,7 @@ def main():
             if keys[pygame.K_ESCAPE] or event.type == pygame.QUIT:
                 run = False
             if keys[pygame.K_RSHIFT]:
-                draw_main_menu(2)
+                draw_main_menu()
             if keys[pygame.K_SPACE]:
                 draw_gameboard()
         draw_main_menu()
