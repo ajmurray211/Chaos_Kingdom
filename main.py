@@ -1,4 +1,3 @@
-
 import pygame, os, random, time, sys
 pygame.font.init()
 
@@ -52,16 +51,13 @@ text_dict = {
     '1': {
         "title": "Chaos Kingdom",
         "prompt1": "Press the spacebar to start",
-        "prompt2": "Press h to view game discription",
+        "prompt2": "Press h to view game description",
         "prompt3": "Press a to view about game maker",
+        "prompt4": "Press c to view controls",
     },
     '2':{
         'title': 'How to play',
         'prompt': 'This is a turn based conquest game. The goal of the game is to take over every city. You will be prompted to move your active token to a city if that city is neutral (blue) you will automatically get it but if that city is the opposing players color you will automatically be launched into a battlemap. The winner of that match will determine who gets the city.'
-    },
-    '4':{
-        'title': 'About maker',
-        'prompt': 'This game was inspired from starwars battlefront 2 a game that my brother and I used to play growing up. The structure is based off of battlefront but the theme of the game stems from my love of Skyrim and fantasy RPGs. This is the first game that I have ever built and I had a blast, hopefully you enjoy playing!'
     },
     '3':{   
         'title': "Battle map",
@@ -74,7 +70,16 @@ text_dict = {
             'ammo': 15,
             'structures': 3,
             'health': 100
-        },
+        }
+    },
+    '4':{
+        'title': 'About maker',
+        'prompt': 'This game was inspired from starwars battlefront 2 a game that my brother and I used to play growing up. The structure is based off of battlefront but the theme of the game stems from my love of Skyrim and fantasy RPGs. This is the first game that I have ever built and I had a blast, hopefully you enjoy playing!'
+    },
+    '5':{
+        'title': 'Battle map controls',
+        'prompt1': '---Player 1--- UP-w, DOWN-s, LEFT-a, RIGHT-d, SHOOT-c, BUILD-v. ',
+        'prompt2': '---Player 2--- UP-arrow up,   DOWN - arrow down,    LEFT - left arrow,    RIGHT - right arrow,    SHOOT - n, BUILD - m'
     }
 }
 city_dict = {
@@ -186,7 +191,6 @@ def renderTextCenteredAt(text, font, color, x, y, screen, allowed_width):
                 break
         line = ' '.join(line_words)
         lines.append(line)
-        print(lines)
 
     y_offset = 0
     for line in lines:
@@ -216,8 +220,6 @@ def draw_gameboard():
     red_owned_cities.append('Utrila')
     green_owned_cities.append('Gishire')
 
-    print(red_active_token, green_active_token)
-
     def change_owner(city, attacker):
         """changes the owner of a city based on an attack"""
         if city in neutral_cities:
@@ -225,10 +227,10 @@ def draw_gameboard():
                 red_owned_cities.append(city)
             if attacker =='green' and city not in green_owned_cities:
                 green_owned_cities.append(city)
-        elif city in red_owned_cities and attacker == 'green':
+        elif city in red_owned_cities and attacker == 'Green':
             red_owned_cities.remove(city)
             green_owned_cities.append(city)
-        elif city in green_owned_cities and attacker == 'red':
+        elif city in green_owned_cities and attacker == 'Red':
                 green_owned_cities.remove(city)
                 red_owned_cities.append(city)
         
@@ -238,10 +240,12 @@ def draw_gameboard():
             red_active_token.pop(0)
             red_active_token.append(city_dict[city]['linked_cities'][index])
             change_owner(city_dict[city]['linked_cities'][index], who)
+            pygame.display.update()
         elif who == 'green':
             green_active_token.pop(0)
             green_active_token.append(city_dict[city]['linked_cities'][index])
             change_owner(city_dict[city]['linked_cities'][index], who)
+            pygame.display.update()
 
     def check_owner(who,city):
         """checks the current owner of the city, and launches battle map if necessary"""
@@ -306,7 +310,6 @@ def draw_gameboard():
                 return True
    
     while run:
-        print(red_active_token, green_active_token)
         keys = pygame.key.get_pressed()
         event = pygame.event.wait()
         clock.tick(FPS)
@@ -340,7 +343,6 @@ def draw_gameboard():
             else:
                 WIN.blit(NEUTRAL_FLAG, (city_dict[name]['x_cord'],city_dict[name]['y_cord']))
                 WIN.blit(city_name, (city_dict[name]['x_cord'], city_dict[name]['y_cord'] - city_name.get_height() + 10))
-        pygame.display.update()
 
         # declares winner
         if len(red_owned_cities) == 13 or 'Gishire' in red_owned_cities:
@@ -358,10 +360,10 @@ def draw_gameboard():
             
         # dev controls to progress or quit to be deleted later 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if keys[pygame.K_ESCAPE]:
                 run = False
-            if keys[pygame.K_6]:
-                draw_battlemap(text_dict['3'])
 
         # renders the city count and updates the screen
         green_cities = ammo_count_font.render(str(len(green_owned_cities)),1, color_dict['black'])
@@ -408,7 +410,6 @@ class Player:
             else:
                 arrow = Arrow(self.x, self.y + RED_PLAYER_IMG.get_height()/2, ARROW1, self.color)
             self.arrows.append(arrow)
-            print(self.mag)
             self.mag -= 1
             self.fire_rate = 1
         elif self.mag == 1:
@@ -417,7 +418,6 @@ class Player:
     def reload_gun(self):
         """relaods the gun after a set amount of time"""
         self.mag = 15
-        print('hit reload')
 
     def cool_down(self):
         """sets a cooldown for shooting"""
@@ -623,14 +623,19 @@ def draw_main_menu(what):
     if what == 'title':
         prompt1 = main_font.render(text_dict['1']['prompt1'], 1, color_dict['black'])
         WIN.blit(prompt1, (WIDTH/2 - prompt1.get_width()/2 ,HEIGHT/2))
-        renderTextCenteredAt(text_dict['1']['prompt2'], main_font,color_dict['black'], 350, HEIGHT - HEIGHT/4, WIN, 200)
-        renderTextCenteredAt(text_dict['1']['prompt3'], main_font,color_dict['black'], 650, HEIGHT - HEIGHT/4, WIN, 200)
+        renderTextCenteredAt(text_dict['1']['prompt2'], main_font,color_dict['black'], 200, HEIGHT - HEIGHT/4, WIN, 200)
+        renderTextCenteredAt(text_dict['1']['prompt3'], main_font,color_dict['black'], 500, HEIGHT - HEIGHT/4, WIN, 200)
+        renderTextCenteredAt(text_dict['1']['prompt4'], main_font,color_dict['black'], 800, HEIGHT - HEIGHT/4, WIN, 200)
     if what == 'how_to':
         renderTextCenteredAt(text_dict['2']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
         renderTextCenteredAt(text_dict['2']['prompt'], main_font, color_dict['black'], WIDTH/2, 200, WIN, 650)
     if what == 'about':
         renderTextCenteredAt(text_dict['4']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
         renderTextCenteredAt(text_dict['4']['prompt'], main_font, color_dict['black'], WIDTH/2, 200, WIN, 650)
+    if what == 'controls':
+        renderTextCenteredAt(text_dict['5']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
+        renderTextCenteredAt(text_dict['5']['prompt1'], main_font, color_dict['black'], WIDTH/2 - 200, 200, WIN, 245)
+        renderTextCenteredAt(text_dict['5']['prompt2'], main_font, color_dict['black'], WIDTH/2 + 200, 200, WIN, 300)
 
 def main():
     """This is the main menu handling initial game events"""
@@ -655,6 +660,8 @@ def main():
                 draw_main_menu('how_to')
             if keys[pygame.K_a]:
                 draw_main_menu('about')
+            if keys[pygame.K_c]:
+                draw_main_menu('controls')
             if keys[pygame.K_SPACE]:
                 draw_gameboard()
 
