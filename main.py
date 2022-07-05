@@ -51,12 +51,17 @@ color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'bl
 text_dict = { 
     '1': {
         "title": "Chaos Kingdom",
-        "prompt": "Press the spacebar to start",
-        'size': 50
+        "prompt1": "Press the spacebar to start",
+        "prompt2": "Press h to view game discription",
+        "prompt3": "Press a to view about game maker",
     },
     '2':{
         'title': 'How to play',
-        'prompt': 'This is where the dicription of the game and how everything works will go.'
+        'prompt': 'This is a turn based conquest game. The goal of the game is to take over every city. You will be prompted to move your active token to a city if that city is neutral (blue) you will automatically get it but if that city is the opposing players color you will automatically be launched into a battlemap. The winner of that match will determine who gets the city.'
+    },
+    '4':{
+        'title': 'About maker',
+        'prompt': 'This game was inspired from starwars battlefront 2 a game that my brother and I used to play growing up. The structure is based off of battlefront but the theme of the game stems from my love of Skyrim and fantasy RPGs. This is the first game that I have ever built and I had a blast, hopefully you enjoy playing!'
     },
     '3':{   
         'title': "Battle map",
@@ -70,11 +75,11 @@ text_dict = {
             'structures': 3,
             'health': 100
         },
-        'winner':''
     }
 }
 city_dict = {
-    "Utrila": {        'x_cord': 836,
+    "Utrila": {        
+        'x_cord': 836,
         'y_cord': 220,
         'city_num': 1,
         'active': True ,
@@ -113,7 +118,7 @@ city_dict = {
         'y_cord': 242,
         'city_num': 6,
         'active': False,
-        'linked_cities': ['Plecdiff', 'Ipria', 'Oreledo','Yido']    
+        'linked_cities': ['Plecdiff', 'Ipria','Yido','Oreledo']    
         },
     "Yido": {
         'x_cord': 830,
@@ -168,6 +173,33 @@ city_dict = {
 ###################### end of Game settings and imports section ##############
  
 ###################### Gameboard gameplay ####################################
+def renderTextCenteredAt(text, font, color, x, y, screen, allowed_width):
+    """Renders text wrapping at a specified width, and centered"""
+    words = text.split()
+    lines = []
+    while len(words) > 0:
+        line_words = []
+        while len(words) > 0:
+            line_words.append(words.pop(0))
+            fw, fh = font.size(' '.join(line_words + words[:1]))
+            if fw > allowed_width:
+                break
+        line = ' '.join(line_words)
+        lines.append(line)
+        print(lines)
+
+    y_offset = 0
+    for line in lines:
+        fw, fh = font.size(line)
+
+        tx = x - fw / 2
+        ty = y + y_offset
+
+        font_surface = font.render(line, True, color)
+        screen.blit(font_surface, (tx, ty))
+
+        y_offset += fh
+
 def draw_gameboard():
     """"starts the gamboard commands"""
     # variables
@@ -226,53 +258,50 @@ def draw_gameboard():
         pygame.time.delay(5000)
         draw_main_menu()
 
-    def print_moves(who, city, city2):
-        movement_text = city_font.render(f'{who} press up to move to {city} or down to move to {city2}',1,color_dict['black']) 
-        WIN.blit(movement_text, (WIDTH /2 - 250, HEIGHT - 40))
-    
     def move(who, city):
-        """checks to see where you can move and allows movement, returns boolean if movement is allowed"""  
-        if len(city_dict[city]['linked_cities']) == 2:
-            print_moves(who, city_dict[city]['linked_cities'][0], city_dict[city]['linked_cities'][1])
+        """checks to see where you can move and allows movement, returns boolean if movement is allowed""" 
+        linked_cities = city_dict[city]['linked_cities']
+        if len(linked_cities) == 2:
+            renderTextCenteredAt(f'{who}: Press UP to move to {linked_cities[0]}, or DOWN to move to {linked_cities[1]}', city_font, color_dict['black'], WIDTH/2, HEIGHT -80, WIN, 500)
             if keys[pygame.K_UP]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[0]))
                 print(check_owner(who, city_dict[city]['linked_cities'][0]))
                 active_token_change(who,city,0)
                 return True
             if keys[pygame.K_DOWN]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[1]))
                 active_token_change(who, city , 1)
                 return True
-        elif len(city_dict[city]['linked_cities']) == 3: 
-            print_moves( who, city_dict[city]['linked_cities'][0],city_dict[city]['linked_cities'][1]) 
+        elif len(linked_cities) == 3: 
+            renderTextCenteredAt(f'{who}: Press UP to move to {linked_cities[0]}, DOWN to move to {linked_cities[1]}, or RIGHT to move to {linked_cities[2]}', city_font, color_dict['black'], WIDTH/2, HEIGHT -80, WIN, 500) 
             if keys[pygame.K_UP]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[0]))
                 active_token_change(who,city, 0)
                 return True
             if keys[pygame.K_DOWN]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[1]))
                 active_token_change(who,city, 1)
                 return True
             if keys[pygame.K_RIGHT]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][2]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[2]))
                 active_token_change(who,city, 2) 
                 return True
-        elif len(city_dict[city]['linked_cities']) == 4: 
-            print_moves(who, city_dict[city]['linked_cities'][0],city_dict[city]['linked_cities'][1])
+        elif len(linked_cities) == 4:             
+            renderTextCenteredAt(f'{who}: Press UP to move to {linked_cities[0]}, DOWN to move to {linked_cities[1]}, RIGHT to move to {linked_cities[2]}, or Left to {linked_cities[3]} ', city_font, color_dict['black'], WIDTH/2, HEIGHT -80, WIN, 500)
             if keys[pygame.K_UP]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][0]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[0]))
                 active_token_change(who,city, 0)
                 return True
             if keys[pygame.K_DOWN]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][1]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[1]))
                 active_token_change(who,city, 1)
                 return True
             if keys[pygame.K_RIGHT]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][2]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[2]))
                 active_token_change(who,city, 2)
                 return True
             if keys[pygame.K_LEFT]:
-                change_owner(city_dict[city]['linked_cities'][0], check_owner(who, city_dict[city]['linked_cities'][3]))
+                change_owner(linked_cities[0], check_owner(who, linked_cities[3]))
                 active_token_change(who,city, 3)
                 return True
    
@@ -588,33 +617,46 @@ def draw_battlemap():
     return(winner_text)
 ############################ End of battlemap section ########################
 
-def draw_main_menu():
+def draw_main_menu(what):
     """draws the main menu and runs the commands"""
     WIN.blit(MAIN_MENU_BG, (0,0))
-    title = winner_font.render(text_dict['1']['title'], 1, color_dict['black'])
-    prompt = main_font.render(text_dict['1']['prompt'], 1, color_dict['black'])
-    WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
-    WIN.blit(prompt, (WIDTH/2 - prompt.get_width()/2 ,HEIGHT/2))
+    if what == 'title':
+        prompt1 = main_font.render(text_dict['1']['prompt1'], 1, color_dict['black'])
+        WIN.blit(prompt1, (WIDTH/2 - prompt1.get_width()/2 ,HEIGHT/2))
+        renderTextCenteredAt(text_dict['1']['prompt2'], main_font,color_dict['black'], 350, HEIGHT - HEIGHT/4, WIN, 200)
+        renderTextCenteredAt(text_dict['1']['prompt3'], main_font,color_dict['black'], 650, HEIGHT - HEIGHT/4, WIN, 200)
+    if what == 'how_to':
+        renderTextCenteredAt(text_dict['2']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
+        renderTextCenteredAt(text_dict['2']['prompt'], main_font, color_dict['black'], WIDTH/2, 200, WIN, 650)
+    if what == 'about':
+        renderTextCenteredAt(text_dict['4']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
+        renderTextCenteredAt(text_dict['4']['prompt'], main_font, color_dict['black'], WIDTH/2, 200, WIN, 650)
 
 def main():
     """This is the main menu handling initial game events"""
     clock = pygame.time.Clock()
     run = True
-    draw_main_menu()
+    draw_main_menu('title')
 
     while run:
         # draw main menu background
+        title = winner_font.render(text_dict['1']['title'], 1, color_dict['black'])
+        WIN.blit(title, (WIDTH/2 - title.get_width()/2,10))
+        
         clock.tick(FPS)
         # default quit function in loop
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE] or event.type == pygame.QUIT:
                 run = False
-            if keys[pygame.K_RSHIFT]:
-                draw_main_menu()
+            if keys[pygame.K_BACKSPACE]:
+                draw_main_menu('title')
+            if keys[pygame.K_h]:
+                draw_main_menu('how_to')
+            if keys[pygame.K_a]:
+                draw_main_menu('about')
             if keys[pygame.K_SPACE]:
                 draw_gameboard()
-        draw_main_menu()
 
         pygame.display.update()
 
