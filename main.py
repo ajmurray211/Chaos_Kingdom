@@ -22,15 +22,14 @@ ARROW_W, ARROW_H = 40, 10
 
 ## Import pictures and set colors ##
 NEUTRAL_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'blue_flag.png')), (50, 40))
+
 # player 1 - red
 RED_PLAYER_IMG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_player.png')), (PLAYER_W, PLAYER_H))
-UNIT1_IMG = pygame.transform.flip(pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit1.png')), (PLAYER_W*2, PLAYER_H*2)), True,False )
 UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'red_flag.png')), (50, 40))
 ACTIVE_UNIT1_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'active_red.png')), (50, 40))
 
 # player 2 - green
 GREEN_PLAYER_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_player.png')), (PLAYER_W, PLAYER_H))
-UNIT2_IMG= pygame.transform.scale(pygame.image.load(os.path.join('assets', 'unit2.png')), (PLAYER_W *2, PLAYER_H*2))
 UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'green_flag.png')), (50, 40))
 ACTIVE_UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'active_green.png')), (50, 40))
 
@@ -42,8 +41,7 @@ BOLDER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bolder
 # Background 
 MAIN_MENU_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'title_bg5.png')), (WIDTH,HEIGHT))
 GAME_BOARD_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'game_board_bg1.jpeg')), (WIDTH,HEIGHT))
-BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'battle_map_bg.png')), (WIDTH,HEIGHT))
-BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG, '3':BATTLEMAP_BG}
+BG_DICT = { '1': MAIN_MENU_BG, '2':GAME_BOARD_BG}#, '3':BATTLEMAP_BG
 
 # color
 color_dict = {'white':(255,255,255), 'yellow':(255,255,0), 'blue':(0,0,255), 'black':(0,0,0), 'green': (0,255,0), 'red':(255,0,0)}
@@ -57,7 +55,7 @@ text_dict = {
     },
     '2':{
         'title': 'How to play',
-        'prompt': 'This is a turn based conquest game. The goal of the game is to take over every city. You will be prompted to move your active token to a city if that city is neutral (blue) you will automatically get it but if that city is the opposing players color you will automatically be launched into a battlemap. The winner of that match will determine who gets the city.'
+        'prompt': 'This is a turn based conquest game. The goal of the game is to take over every city. You will be prompted to move your active token to a city if that city is neutral (blue) you will automatically get it but if that city is the opposing players color you will automatically be launched into a battlemap. The winner of that match will determine who gets the city. Once you select a direction to move press the spacebar to end your turn.'
     },
     '3':{   
         'title': "Battle map",
@@ -78,8 +76,8 @@ text_dict = {
     },
     '5':{
         'title': 'Battle map controls',
-        'prompt1': '---Player 1--- UP-w, DOWN-s, LEFT-a, RIGHT-d, SHOOT-c, BUILD-v. ',
-        'prompt2': '---Player 2--- UP-arrow up,   DOWN - arrow down,    LEFT - left arrow,    RIGHT - right arrow,    SHOOT - n, BUILD - m'
+        'prompt1': '--- Player 1 --- UP-w, DOWN-s, LEFT-a, RIGHT-d, SHOOT-c, BUILD-v. ',
+        'prompt2': '--- Player 2 --- UP-arrow up, DOWN - arrow down, LEFT - left arrow, RIGHT - right arrow, SHOOT - n, BUILD - m'
     }
 }
 city_dict = {
@@ -87,91 +85,91 @@ city_dict = {
         'x_cord': 836,
         'y_cord': 220,
         'city_num': 1,
-        'active': True ,
-        'linked_cities': ['Yido', 'Ipria']   
+        'bg': 'lava_bg',
+        'linked_cities': ['Yido', 'Ipria']
         },
     "Gishire": {
         'x_cord': 95,
         'y_cord': 300,
         'city_num': 2,
-        'active': True ,
-        'linked_cities': ['Tetgas','Sheaford']   
+        'bg': 'mountain_bg',
+        'linked_cities': ['Tetgas', 'Sheaford']
         },
     "Tetgas": {        
         'x_cord': 320,
         'y_cord': 212,
         'city_num': 3,
-        'active': False,
-        'linked_cities': ['Gishire','Oreledo','Plecdiff']    
+        'bg': 'waterfall_bg',
+        'linked_cities': ['Gishire', 'Oreledo', 'Plecdiff']
         },
     "Oreledo": {
         'x_cord': 395,
         'y_cord': 300,
         'city_num': 4,
-        'active': False,
-        'linked_cities': ['Tetgas','Inphis', 'Strinta']    
+        'bg': 'mountain_bg',
+        'linked_cities': ['Tetgas', 'Inphis', 'Strinta']
         },
     "Plecdiff": {
         'x_cord': 460,
         'y_cord': 185,
         'city_num': 5,
-        'active': False,
-        'linked_cities': ['Tetgas','Strinta']    
+        'bg': 'mountain_bg',
+        'linked_cities': ['Tetgas', 'Strinta']
         },
     "Strinta": {
         'x_cord': 518,
         'y_cord': 242,
         'city_num': 6,
-        'active': False,
-        'linked_cities': ['Plecdiff', 'Ipria','Yido','Oreledo']    
+        'bg': 'mountain_bg',
+        'linked_cities': ['Plecdiff', 'Ipria', 'Yido', 'Oreledo']    
         },
     "Yido": {
         'x_cord': 830,
         'y_cord': 100,
         'city_num': 7,
-        'active': False,
-        'linked_cities': ['Strinta','Utrila']    
+        'bg': 'winter_bg',
+        'linked_cities': ['Strinta', 'Utrila']    
         },
     "Ipria": {
         'x_cord': 627,
         'y_cord': 343,
         'city_num': 8,
-        'active': False,
-        'linked_cities': ['Utrila','Strinta', 'Zhento']    
+        'bg': 'desert_bg1',
+        'linked_cities': ['Utrila', 'Strinta', 'Zhento']    
         },
     "Zhento": {
         'x_cord': 765,
         'y_cord': 450,
         'city_num': 9,
-        'active': False,
+        'bg': 'desert_bg1',
         'linked_cities': ['Ipria', 'Uleron']
         },
     "Uleron": {
         'x_cord': 374,
         'y_cord': 478,
         'city_num': 10,
-        'active': False,
-        'linked_cities': ['Inphis','Zhento']
+        'bg': 'winter_bg',
+        'linked_cities': ['Inphis', 'Zhento']
     },
     "Inphis": {
         'x_cord': 334,
         'y_cord': 347,
         'city_num': 11,
-        'active': False,
-        'linked_cities': ['Oreledo','Uleron', 'Glavine']
+        'bg': 'mountain_bg',
+        'linked_cities': ['Oreledo', 'Uleron', 'Glavine']
     },
     "Glavine": {
         'x_cord': 295,
         'y_cord': 317,
         'city_num': 12,
-        'active': False,
+        'bg': 'mountain_bg',
         'linked_cities': ['Inphis','Sheaford']
     },
     "Sheaford": {
         'x_cord': 205,
         'y_cord': 400,
         'city_num': 13,
-        'active': False,
+        'bg': 'mountain_bg',
         'linked_cities': ['Gishire','Glavine']
     }
 }
@@ -222,15 +220,16 @@ def draw_gameboard():
 
     def change_owner(city, attacker):
         """changes the owner of a city based on an attack"""
+        print(attacker)
         if city in neutral_cities:
             if attacker == 'red' and city not in red_owned_cities:
                 red_owned_cities.append(city)
             if attacker =='green' and city not in green_owned_cities:
                 green_owned_cities.append(city)
-        elif city in red_owned_cities and attacker == 'Green':
+        elif city in red_owned_cities and attacker == 'green':
             red_owned_cities.remove(city)
             green_owned_cities.append(city)
-        elif city in green_owned_cities and attacker == 'Red':
+        elif city in green_owned_cities and attacker == 'red':
                 green_owned_cities.remove(city)
                 red_owned_cities.append(city)
         
@@ -250,9 +249,9 @@ def draw_gameboard():
     def check_owner(who,city):
         """checks the current owner of the city, and launches battle map if necessary"""
         if who == 'red' and city in green_owned_cities:
-            draw_battlemap()
+            draw_battlemap(city_dict[city]['bg'])
         if who == 'green' and city in red_owned_cities:
-            draw_battlemap()
+            draw_battlemap(city_dict[city]['bg'])
 
     def winner(who):
         """declares the game winner and brings you to main menu"""
@@ -371,7 +370,6 @@ def draw_gameboard():
         red_cities = ammo_count_font.render(str(len(red_owned_cities)),1, color_dict['black'])
         WIN.blit(red_cities, (860, HEIGHT - ammo_count_font.get_height() - 10))
         pygame.display.update()
-
 ############################ end of gameboard gameplay #######################
 
 ########################### Battlemap gameplay ################################
@@ -406,9 +404,9 @@ class Player:
         """shoots a arrow"""
         if self.mag >= 0 and self.fire_rate == 0:
             if inverse:
-                arrow = Arrow(self.x + GREEN_PLAYER_IMG.get_width(), self.y + GREEN_PLAYER_IMG.get_height()/2, pygame.transform.rotate(ARROW1, 180), self.color)
+                arrow = Arrow(self.x, self.y + GREEN_PLAYER_IMG.get_height()/2, pygame.transform.rotate(ARROW1, 180), self.color)
             else:
-                arrow = Arrow(self.x, self.y + RED_PLAYER_IMG.get_height()/2, ARROW1, self.color)
+                arrow = Arrow(self.x + GREEN_PLAYER_IMG.get_width(), self.y + RED_PLAYER_IMG.get_height()/2, ARROW1, self.color)
             self.arrows.append(arrow)
             self.mag -= 1
             self.fire_rate = 1
@@ -514,21 +512,21 @@ class Structure:
         """checks to see in a structure was hit"""
         return fired_round(self,round)
 
-def draw_battlemap():
+def draw_battlemap(map):
     """starts the battlemap commands"""
     green_player = Player(50, HEIGHT - (GREEN_PLAYER_IMG.get_height() + 50) ,GREEN_PLAYER_IMG , 'green')
     red_player = Player(WIDTH - (RED_PLAYER_IMG.get_width()+50),100,RED_PLAYER_IMG, 'red')
     player_vel = 6
     winner_text = ''
     run = True
+    BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', f'{map}.png')), (WIDTH,HEIGHT))
     pygame.display.update()
 
     while winner_text == '' and run:
         WIN.blit(BATTLEMAP_BG,(0,0))
         def draw_winner(text):
             """handles player winning"""
-            draw_text = winner_font.render(f"{text} player wins!!", 1, color_dict['white'])
-            WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT /2 - draw_text.get_height() /2 ))
+            renderTextCenteredAt(f"{text} player wins!!", winner_font,color_dict['black'],WIDTH/2 ,HEIGHT /2 , WIN, 900)
             pygame.display.update()
             pygame.time.delay(5000)
 
@@ -540,13 +538,13 @@ def draw_battlemap():
         # handles the player movement and limits the players movement to their perspective boxes
         if keys[pygame.K_a] and green_player.x + player_vel > 0:
             green_player.move('left', player_vel)
-        if keys[pygame.K_d] and green_player.x + player_vel + PLAYER_W < WIDTH / 2 - RIVER.get_width() / 2:
+        if keys[pygame.K_d] and green_player.x + player_vel + PLAYER_W < WIDTH / 2 - 100:
             green_player.move('right', player_vel)
         if keys[pygame.K_w] and green_player.y > 20:
             green_player.move('up', player_vel)
         if keys[pygame.K_s] and green_player.y + player_vel + PLAYER_H < HEIGHT :
             green_player.move('down', player_vel)
-        if keys[pygame.K_LEFT] and red_player.x + player_vel + PLAYER_W > WIDTH / 2 + RIVER.get_width() + PLAYER_W:
+        if keys[pygame.K_LEFT] and red_player.x + player_vel + PLAYER_W > WIDTH / 2 + 100 + PLAYER_W:
             red_player.move('left', player_vel)
         if keys[pygame.K_RIGHT] and red_player.x + player_vel < WIDTH - PLAYER_W:
             red_player.move('right', player_vel)
@@ -586,19 +584,19 @@ def draw_battlemap():
                     green_player.cover_built.remove(build)
 
         # draws the barbed wire/ sandbags/ ammo_count
-        WIN.blit(RIVER, (WIDTH/2 - RIVER.get_width()/2, 10))
+        # WIN.blit(RIVER, (WIDTH/2 - RIVER.get_width()/2, 10))
         for key in text_dict['3']:
             # draws greens info
             if key == 'green':
                 green_ammo_count = ammo_count_font.render(str(green_player.mag),1, color_dict['green'])
-                WIN.blit(green_ammo_count, (WIDTH - WIDTH/2 - green_ammo_count.get_width() - 50,10))
+                WIN.blit(green_ammo_count, (WIDTH - WIDTH/2 - green_ammo_count.get_width() - 150,10))
                 for i in range(0, 3-len(green_player.cover_built)):
                     WIN.blit(BOLDER,(BOLDER.get_width() * i, 10))
 
             # draws reds info
             if key == 'red':
                 red_ammo_count = ammo_count_font.render(str(red_player.mag),1,color_dict['red'])
-                WIN.blit(red_ammo_count, (WIDTH/2 + red_ammo_count.get_width(), 10))
+                WIN.blit(red_ammo_count, (WIDTH/2 + red_ammo_count.get_width() + 100, 10))
                 for i in range(0, 3-len(red_player.cover_built)):
                     WIN.blit(BOLDER,(WIDTH - (BOLDER.get_width() * (i+1)), 10))
 
@@ -635,7 +633,7 @@ def draw_main_menu(what):
     if what == 'controls':
         renderTextCenteredAt(text_dict['5']['title'], main_font, color_dict['black'], WIDTH/2, 150, WIN, 600)
         renderTextCenteredAt(text_dict['5']['prompt1'], main_font, color_dict['black'], WIDTH/2 - 200, 200, WIN, 245)
-        renderTextCenteredAt(text_dict['5']['prompt2'], main_font, color_dict['black'], WIDTH/2 + 200, 200, WIN, 300)
+        renderTextCenteredAt(text_dict['5']['prompt2'], main_font, color_dict['black'], WIDTH/2 + 200, 200, WIN, 325)
 
 def main():
     """This is the main menu handling initial game events"""
