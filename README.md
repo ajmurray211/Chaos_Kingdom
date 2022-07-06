@@ -7,11 +7,11 @@
 |Day 1| Wireframes / Priority Matrix / Timeline / Approval | Complete
 |Day 2| Core Application Structure for main menu, game board, and battle map | Complete
 |Day 3| Battle map gameplay | Complete
-|Day 4| Game board gameplay | Incomplete
+|Day 4| Game board gameplay | Complete
 |Day 5| Custom controls or save/load feature| Incomplete
 |Day 6| Multiplayer  | Incomplete
-|Day 7| Final touches | Incomplete
-|Day 8| Present | Incomplete
+|Day 7| Final touches | Complete
+|Day 8| Present | Complete
 
 ## Project Description
 
@@ -36,13 +36,13 @@ This is a game that allows two players to move units on a map and if those two u
 
 | Component | Priority | Estimated Time | Actual Time |
 | --- | :---: |  :---: | :---: | 
-| Main menu                                               | H | 5hrs  | - |
-| Game board launches Battle map                          | H | 4hrs  | - |
-| Battle map                                              | H | 8hrs  | - |
-| Battle map gameplay and results displayed               | H | 4hrs  | - |
-| Health bars                                             | M | 4hrs  | - |
-| Structure building                                      | M | 3hrs  | - |
-| Total                                                   | - | 28hrs | - |
+| Main menu                                               | H | 5hrs  | 4hrs |
+| Game board launches Battle map                          | H | 4hrs  | 6hrs |
+| Battle map                                              | H | 8hrs  | 10hrs |
+| Battle map gameplay and results displayed               | H | 4hrs  | 3hrs |
+| Health bars                                             | M | 4hrs  | 2hrs |
+| Structure building                                      | M | 3hrs  | 3hrs |
+| Total                                                   | - | 28hrs | 28hrs |
 
 ### PostMVP
 - Custom controls
@@ -58,11 +58,11 @@ This is a game that allows two players to move units on a map and if those two u
 | Custom controls                                     | M | 3hrs    | - |
 | AIvP or PvP option                                  | M | 3hrs    | - |
 | AI with movements and shooting                      | M | 8hrs    | - |
-| Game board with movements and updating with results | M | 3.5hrs  | - |
-| Multiple maps                                       | M | 4hrs    | - |
+| Game board with movements and updating with results | M | 3.5hrs  | 10hrs |
+| Multiple maps                                       | M | 4hrs    | 2hrs |
 | Multiplayer                                         | L | 9hrs    | - |
 | Save and load progress                              | L | 7hrs    | - |
-| Total                                               | - | 37.5hrs | - |
+| Total                                               | - | 37.5hrs | 12hrs |
 
 ## Additional Libraries
 - [pygame](https://www.pygame.org/docs/)

@@ -35,7 +35,6 @@ ACTIVE_UNIT2_FLAG = pygame.transform.scale(pygame.image.load(os.path.join('asset
 
 # arrows and barriers
 ARROW1 = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'arrow1.png')), (ARROW_W, ARROW_H))
-RIVER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'river.png')), (120, HEIGHT))
 BOLDER = pygame.transform.scale(pygame.image.load(os.path.join('assets', 'bolder.png')), (90, 70))
 
 # Background 
@@ -92,7 +91,7 @@ city_dict = {
         'x_cord': 95,
         'y_cord': 300,
         'city_num': 2,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Tetgas', 'Sheaford']
         },
     "Tetgas": {        
@@ -106,21 +105,21 @@ city_dict = {
         'x_cord': 395,
         'y_cord': 300,
         'city_num': 4,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Tetgas', 'Inphis', 'Strinta']
         },
     "Plecdiff": {
         'x_cord': 460,
         'y_cord': 185,
         'city_num': 5,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Tetgas', 'Strinta']
         },
     "Strinta": {
         'x_cord': 518,
         'y_cord': 242,
         'city_num': 6,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Plecdiff', 'Ipria', 'Yido', 'Oreledo']    
         },
     "Yido": {
@@ -155,21 +154,21 @@ city_dict = {
         'x_cord': 334,
         'y_cord': 347,
         'city_num': 11,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Oreledo', 'Uleron', 'Glavine']
     },
     "Glavine": {
         'x_cord': 295,
         'y_cord': 317,
         'city_num': 12,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Inphis','Sheaford']
     },
     "Sheaford": {
         'x_cord': 205,
         'y_cord': 400,
         'city_num': 13,
-        'bg': 'mountain_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Gishire','Glavine']
     }
 }
