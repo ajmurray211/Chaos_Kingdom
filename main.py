@@ -98,7 +98,7 @@ city_dict = {
         'x_cord': 320,
         'y_cord': 212,
         'city_num': 3,
-        'bg': 'waterfall_bg',
+        'bg': 'mountain_bg1',
         'linked_cities': ['Gishire', 'Oreledo', 'Plecdiff']
         },
     "Oreledo": {
@@ -374,7 +374,7 @@ def draw_gameboard():
 ########################### Battlemap gameplay ################################
 class Player:
     MAX_FIRE_RATE = 35
-    def __init__(self,x, y, player_img, color, health =100):
+    def __init__(self,x, y, player_img, color, player_vel=3, is_ai = False, health =100):
         self.x =x
         self.y =y
         self.color =color
@@ -388,6 +388,30 @@ class Player:
         self.build_rate = 0
         self.mag = text_dict['3'][self.color]['ammo']
         self.cover_count =text_dict['3'][self.color]['structures']
+        self.is_ai = is_ai
+        self.player_vel = player_vel
+
+    def ai_logic(self, target):
+            """AI logic for NPC player"""
+            # Implement NPC decision-making logic here
+
+            def random_roam(self):
+                if self.y <= 20:
+                    while (self.y + self.player_vel + PLAYER_H < HEIGHT):
+                        self.move('down')
+                        return
+                else:
+                    while self.y > 20:
+                        self.move('up') 
+                        return
+
+            if self.is_ai:
+                random_roam(self) 
+                for arrow in target.arrows:
+                    if self.hit(arrow):
+                        self.move('up')
+                if self.y  == target.y:
+                    self.shoot()
 
     def draw(self, window):
         """draws the player, and calls arrows, structures and health draw methods"""
@@ -431,16 +455,16 @@ class Player:
             if arrow.off_screen():
                 self.arrows.remove(arrow)
 
-    def move(self, direction, player_vel):
+    def move(self, direction):
         """controls a players movement"""
         if direction == 'right':
-            self.x += player_vel
+            self.x += self.player_vel
         if direction == 'left':
-            self.x -= player_vel
+            self.x -= self.player_vel
         if direction == 'up':
-            self.y -= player_vel
+            self.y -= self.player_vel
         if direction == 'down':
-            self.y += player_vel
+            self.y += self.player_vel
 
     def hit(self, round):
         """checks to see if a hit has happened"""
@@ -513,15 +537,20 @@ class Structure:
 
 def draw_battlemap(map):
     """starts the battlemap commands"""
-    green_player = Player(50, HEIGHT - (GREEN_PLAYER_IMG.get_height() + 50) ,GREEN_PLAYER_IMG , 'green')
-    red_player = Player(WIDTH - (RED_PLAYER_IMG.get_width()+50),100,RED_PLAYER_IMG, 'red')
     player_vel = 6
+    green_player = Player(50, HEIGHT - (GREEN_PLAYER_IMG.get_height() + 50) ,GREEN_PLAYER_IMG , 'green', is_ai=True)
+    red_player = Player(WIDTH - (RED_PLAYER_IMG.get_width()+50),100,RED_PLAYER_IMG, 'red',player_vel,)
+
     winner_text = ''
     run = True
     BATTLEMAP_BG = pygame.transform.scale(pygame.image.load(os.path.join('assets', f'{map}.png')), (WIDTH,HEIGHT))
     pygame.display.update()
 
     while winner_text == '' and run:
+
+        # Call AI logic for the NPC player
+        green_player.ai_logic(red_player)
+
         WIN.blit(BATTLEMAP_BG,(0,0))
         def draw_winner(text):
             """handles player winning"""
@@ -538,19 +567,19 @@ def draw_battlemap(map):
         if keys[pygame.K_a] and green_player.x + player_vel > 0:
             green_player.move('left', player_vel)
         if keys[pygame.K_d] and green_player.x + player_vel + PLAYER_W < WIDTH / 2 - 100:
-            green_player.move('right', player_vel)
+            green_player.move('right')
         if keys[pygame.K_w] and green_player.y > 20:
-            green_player.move('up', player_vel)
+            green_player.move('up')
         if keys[pygame.K_s] and green_player.y + player_vel + PLAYER_H < HEIGHT :
-            green_player.move('down', player_vel)
+            green_player.move('down')
         if keys[pygame.K_LEFT] and red_player.x + player_vel + PLAYER_W > WIDTH / 2 + 100 + PLAYER_W:
-            red_player.move('left', player_vel)
+            red_player.move('left')
         if keys[pygame.K_RIGHT] and red_player.x + player_vel < WIDTH - PLAYER_W:
-            red_player.move('right', player_vel)
+            red_player.move('right')
         if keys[pygame.K_UP] and red_player.y > 20:
-            red_player.move('up', player_vel)
+            red_player.move('up')
         if keys[pygame.K_DOWN]and red_player.y + player_vel + PLAYER_H < HEIGHT:
-            red_player.move('down', player_vel)
+            red_player.move('down')
         if keys[pygame.K_v]:
             green_player.build()
         if keys[pygame.K_n]:
