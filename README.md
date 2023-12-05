@@ -66,3 +66,8 @@ This is a game that allows two players to move units on a map and if those two u
 
 ## Additional Libraries
 - [pygame](https://www.pygame.org/docs/)
+
+## Current todo list 
+|Turns need double clicking to confirm. Fix to be a one click movement.|
+|Create an automated enemy starting with movement and andom generation for shooting then moving onto more complex decisions|
+||
